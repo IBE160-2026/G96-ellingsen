@@ -8,4 +8,4 @@
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — føre SQLite-valget i beslutningsloggen i `docs/research/research-plan.md` (allerede valgt i briefen) (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — avklare hva som skjer med produkter med under 12 måneders historikk (sesongnaiv trenger 12), og oppdatere F5 i briefen (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — føre beslutningene fra research-planen inn i PRODUCT_BRIEF.md (venter på godkjenning av forslagene) (løst 2026-11-14)
-- [ ] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — ta med de nye reglene fra briefen (80 %-nivå, nullgrense, backtest-oppsett, CSV-validering) i arkitekturdokumentet i steg 4
+- [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — ta med de nye reglene fra briefen (80 %-nivå, nullgrense, backtest-oppsett, CSV-validering) i arkitekturdokumentet i steg 4 (løst 2026-11-14)
