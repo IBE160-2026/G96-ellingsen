@@ -12,5 +12,5 @@
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — gruppen leser gjennom presiseringene i PRD §11.2 (felles siste måned, historikknivået *sesongnaiv*, historikklengde med begge endepunktene, ingen lagring hvis kjøringen feiler)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — arkitekturen: datamodell og API for total WAPE, verdier per opprinnelse, endepunkt for oppsummering og lagret valideringsrapport (H6, se addendum)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — oppdatere `arkitektur-utkast.md` på de 5 punktene der det er utdatert mot beslutningsloggen
-- [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — legge til en regel for `*.db` i `.gitignore` (NFR-9)
+- [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — legge til en regel for `*.db` i `.gitignore` (NFR-9) (løst 2026-11-14)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — åpne spørsmål i PRD §10: spike for backtest-oppsettet, ERP-eksportformater, validering av personaen
