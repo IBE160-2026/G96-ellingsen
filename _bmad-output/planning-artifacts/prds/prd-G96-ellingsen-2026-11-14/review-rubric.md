@@ -1,0 +1,100 @@
+# PRD-kvalitetsgjennomgang — PROGNOS v1 (prd-G96-ellingsen-2026-11-14)
+
+Gjennomgått: `prd.md` og `addendum.md`. F1–F14 er kontrollert mot PRODUCT_BRIEF.md avsnitt 6 og står ordrett. Disse valgene er tatt av brukeren og vurderes ikke som feil her: sporbarhetstabellen (§9), F1–F14 ordrett, strengt v1-omfang, Kari som eneste persona og beslutningene i beslutningsloggen.
+
+## Samlet vurdering
+
+PRD-en har en tydelig tese, et ærlig omfang, en ordliste og en sporbarhetskjede fra brief via FR til F-kriterium. Den er bedre enn det som er vanlig for et studentprosjekt. Det største hullet er hvordan man vet at et FR er ferdig. Flere grensetilfeller som tester og stories må ta stilling til er ikke spesifisert: WAPE når Σ faktisk = 0, baseline-backtest for 12–17 måneders historikk, hvilken modell intervalldekningen gjelder, rekkefølgen blant flaggede produkter og om horisonten regnes per produkt eller per datasett. I tillegg krever NFR-6 bare tester for F1–F14, så omtrent en tredjedel av FR-ene har ingen påkrevd test. Ordlista lover «uten synonymer», men det løftet holdes ikke helt. Mest alvorlig er at **Horisont** også brukes om backtestens 1-månedsprognose.
+
+## Beslutningsklarhet — sterk
+
+Beslutningene står som beslutninger og ikke som «hensyn». Avveiingene er navngitt sammen med det man gir opp. FR-12 sier rett ut at spennet i scenariototalen er bredere enn det reelle. FR-17 viser ETS selv når den taper, men flagger produktet. FR-14 holder produkter med bare baseline-backtest utenfor totalen, og prisen for det står der. De to åpne spørsmålene i §10 er reelt åpne og har eier eller blokkerstatus.
+
+Det er én spenning som ikke er løst. §10.1 sier at datasettet eller generatoren skal justeres hvis F7 ikke holder. SM-C1 sier at datasettet ikke skal tilpasses for å få F7 grønn. Begge kan være riktige, men PRD-en sier ikke hvor grensen går.
+
+### Funn
+- **medium** Åpent spørsmål 1 kolliderer med motvekten SM-C1 (§10.1 og §8.2) — «datasettet eller generatoren må justeres» er nettopp det SM-C1 advarer mot, og ingenting skiller lovlig justering fra tilpasning. *Fix:* Legg en setning til i §10.1, for eksempel: «Justering er lov så lenge FR-24 holder og minst ett produkt fortsatt får flagget *ETS taper*. Juster ikke støy eller trend produkt for produkt for å senke WAPE.»
+
+## Substans fremfor teater — sterk
+
+Visjonen (§1) er konkret for regnearkplanleggeren i en SMB og kan ikke flyttes til en annen PRD uten endring. Kari driver faktiske valg: semikolon fra norsk Excel, 200 produkter i NFR-7 og «samme måned i fjor» som baseline. NFR-ene har stort sett produktspesifikke terskler. Det finnes ingen innovasjonsteater, og §6 avviser eksplisitt at PROGNOS konkurrerer med kommersielle verktøy.
+
+### Funn
+- **low** NFR-8 har ingen testbar betingelse (§5) — kravet er reelt, men tabellraden er tom på begge kolonnene. *Fix:* Bruk for eksempel «Ingen API-endepunkt krever autentisering, og dashbordet har ingen innloggingsside», eller flytt punktet til §6/§7.2 som avgrensning.
+- **low** NFR-3 dupliserer FR-6 (§5) — «Se FR-6» gir ingen ny informasjon. *Fix:* Behold raden for sporbarheten til F11, men skriv at FR-6 er kravet og at NFR-3 bare er en peker. Ellers kan raden fjernes.
+
+## Strategisk sammenheng — sterk
+
+Tesen er at en prognose med synlig usikkerhet, etterprøvd mot baseline, er mer nyttig enn ett tall. Funksjonene §4.2–§4.5 følger tesen direkte, og dashbordets sortering («svakeste øverst») er tesen gjort om til grensesnitt. SM-1 og SM-2 validerer de to delene av tesen (treffsikkerhet og ærlige intervaller), og begge har en motvekt (SM-C1, SM-C2). MVP-typen er problemløsning, og omfangslogikken stemmer med det.
+
+### Funn
+- **low** SM-1 og SM-2 måles bare på et datasett gruppen selv genererer (§8.2) — med SM-C1 er det akseptabelt for emnet, men tesen («mer nyttig for planleggeren») blir ikke validert. *Fix:* Skriv én setning i §8.3 om at nytten for planleggeren ikke måles i v1. Det er en ærlig avgrensning, ikke ny scope.
+
+## Hvor tydelig «ferdig» er — tynn
+
+Her trenger PRD-en mest arbeid før stories. Strukturen er god: hvert FR har «Konsekvenser (testbare)», og mange av dem er presise (FR-3, FR-9, FR-11, FR-14 første punkt, FR-23). Men flere FR-er har hull i nettopp de grensetilfellene en utvikler og en test må avgjøre. Der vil to utviklere bygge forskjellig. Noen konsekvenser er adjektiver («tydelig», «rundt», «de fleste», «vanlig»). Andre bruker et begrep som ikke er definert for det aktuelle tilfellet.
+
+### Funn
+- **high** WAPE er udefinert når Σ faktisk = 0 (FR-14, FR-19, ordlista: *WAPE*) — et produkt med bare nuller i de siste 6 månedene gir divisjon med null. Det kan for eksempel være et utgått produkt, eller et produkt der utfylte måneder (FR-4) ligger på slutten. Da vet heller ikke FR-19 hvor produktet skal sorteres. *Fix:* Legg til en konsekvens i FR-14: «Hvis Σ faktisk = 0 for et produkt, er WAPE udefinert, vises som ‹–› og inngår ikke i totalen. Produktet sorteres [øverst/nederst] i FR-19.»
+- **high** Baseline-backtest er ikke gjennomførbar for 12–17 måneders historikk (§4.4-tabellen, FR-13, FR-16) — sesongnaiv baseline for måned *t* trenger måned *t*−12. Med 6 opprinnelser over de siste 6 månedene krever full baseline-backtest 18 måneder. Tabellen lover «Bare sesongnaiv baseline» for 12–29 mnd. Beslutningen («under 30 mnd får bare baseline-backtest») trenger ikke tas opp igjen, men PRD-en må si hva som skjer for 12–17 mnd. *Fix:* Legg til en konsekvens i FR-16, for eksempel «Et produkt med 12–17 måneders historikk får baseline-backtest bare for de opprinnelsene der måneden 12 måneder før finnes (historikklengde − 12 opprinnelser)», eller «ingen backtest». Oppdater tabellen tilsvarende og si hvordan dette påvirker WAPE per produkt og sorteringen.
+- **high** Det står ikke hvilken modell intervalldekningen gjelder, eller hvordan den aggregeres (FR-15, FR-21, F8, UJ-3) — FR-15 sier «intervalldekningen for P10–P90 i backtesten», men ikke om det er ETS, baseline eller begge. Det står heller ikke om F8 gjelder per produkt eller totalt. FR-21 viser dekningen per produkt, også for produkter som bare har baseline-backtest. *Fix:* Skriv i FR-15: «Intervalldekning beregnes for ETS per produkt og totalt over de samme produktene som total WAPE (FR-14). F8 gjelder totalen. For produkter med bare baseline-backtest vises dekningen for baseline [eller ikke].»
+- **high** Rekkefølgen blant flaggede produkter er ikke definert (FR-19, UJ-1, UJ-3) — «Flaggede produkter står øverst», men det står ikke hvordan *kort historikk* (ofte uten WAPE) og *ETS taper* sorteres innbyrdes. Det står heller ikke noen regel for like verdier. UJ-1 har 3 produkter med *kort historikk*, og UJ-3 sier at P-109 (*ETS taper*) står «øverst i listen». Det går bare opp med en regel som ikke står i PRD-en. Uten en deterministisk rekkefølge blir Playwright-testen av listen ustabil. *Fix:* Legg til i FR-19: «Innenfor flaggede: *ETS taper* først, deretter *kort historikk*. Innenfor hver gruppe sorteres etter WAPE med høyest først, produkter uten WAPE sist, og ved like verdier etter `produkt_id` stigende.» Velg selv rekkefølgen, men skriv den ned.
+- **high** Horisont og backtest-vindu er definert mot «salgshistorikken» uten å si om det gjelder produktet eller datasettet (ordlista: *Horisont*, *Backtest*; FR-8, FR-13, FR-14) — et produkt som sluttet å selge i 2025-06 i et datasett som går til 2026-10, får en annen horisont og andre backtest-måneder enn de andre produktene. FR-14 forutsetter «de samme … opprinnelsene» i totalen. *Fix:* Bestem og skriv i ordlista: «siste måned i salgshistorikken = siste `maaned` for produktet» (eller «for datasettet»). Hvis det gjelder produktet, må FR-14 omformuleres fra «de samme opprinnelsene» til «de samme produktene».
+- **high** Mange FR-er har ingen påkrevd test (NFR-6, §8.1, §9) — NFR-6 krever bare at F1–F14 er dekket. FR-1 (ekstra kolonner), FR-7, FR-12 (merknaden), FR-13, FR-16, FR-17, FR-19, FR-22 og FR-25 er ikke dekket av noe F-kriterium eller bare indirekte. F10 er knyttet til FR-18–FR-22, men F10 nevner bare historikk, prognose, intervall og scenarioer. Det dekker ikke datasettvelger, sortering, flagg, backtest-tabell eller WAPE-oversikt. Sensor ser etter sporbarhet fra plan til test, og det er her kjeden brytes. *Fix:* Utvid NFR-6 (F-kriteriene beholdes ordrett): «I tillegg har hver testbar konsekvens i FR-1–FR-25 minst ett automatisk testtilfelle.» Vurder en kolonne «Test» i §9 eller en egen matrise FR → testfil, som stories kan fylle ut.
+- **medium** Det står ikke om FR-4 gir én advarsel per produkt eller per utfylt måned (FR-4, UJ-1, ordlista: *Advarsel*) — FR-4 sier «en advarsel for produktet», ordlista bruker «en utfylt måned» som eksempel, og UJ-1 sier «2 advarsler om manglende måneder». *Fix:* Skriv i FR-4: «Én advarsel per produkt med utfylte måneder, som lister de utfylte månedene», eller én per måned. Juster UJ-1 slik at det stemmer.
+- **medium** «Historikklengde … fra første til siste måned» sier ikke om begge endepunkter telles med (ordlista: *Historikklengde*, FR-5, FR-16) — grensene 12, 24 og 30 er nettopp det testene skal treffe. Er 2024-01 til 2025-12 23 eller 24 måneder? *Fix:* Skriv «Antall måneder i serien, inkludert første og siste, etter utfylling (2024-01–2025-12 = 24)». Legg til grensetester i FR-5: 11/12, 23/24 og 29/30 måneder.
+- **medium** Gyldighetsreglene i FR-3 er ufullstendige (FR-3, F4) — det står ikke om `2025-13` er gyldig (format riktig, dato ugyldig, og F4 sier «ugyldig dato»). Tomme celler, tom `produkt_id`, `12.0`, `1 200` og en fil med bare overskrift (ordlista sier at et datasett har «ett eller flere produkter») er heller ikke dekket. Det er ikke sagt om radnummer teller overskriftslinja. Det står heller ikke om tegnkoding (UTF-8, BOM) er en regel, men §10.2 nevner BOM som et kjent problem. *Fix:* Legg til konsekvenser: «Måned 01–12, ellers feil», «tom celle i påkrevd kolonne gir feil med radnummer», «fil uten datarader gir feil», «radnummer = linjenummer i fila, overskrift er linje 1», og «fila leses som UTF-8, med eller uten BOM». Det siste er en presisering av FR-1, ikke et nytt format.
+- **medium** Regelen for gjenkjenning av skilletegn er ikke angitt (FR-2) — det står ikke hva som avgjør når en semikolonfil har komma i verdiene, som `12,5` i UJ-2, eller når begge tegn finnes i overskriften. *Fix:* Skriv «Skilletegnet bestemmes ut fra overskriftslinja: det tegnet som gir de tre påkrevde kolonnene.» Legg til en konsekvens om at `12,5` i en semikolonfil gir feilen fra FR-3 (heltall) og ikke en feil om skilletegn.
+- **medium** Det står ikke hva som skjer når prognosekjøringen feiler (FR-7, FR-6) — «Ingenting lagres» gjelder bare avviste filer. Hvis ETS feiler for ett produkt eller kjøringen krasjer, står det ikke om datasettet lagres delvis eller ikke i det hele tatt. Det står heller ikke om opplastingen er synkron (opptil 60 s, NFR-7) eller asynkron. Konsekvensen «fører til at produktlisten … kan vises» er vag. *Fix:* Skriv: «Opplasting, validering, prognose og backtest skjer i én forespørsel. Datasettet lagres bare hvis hele kjøringen lykkes. Ellers vises en feil, og ingenting lagres.» Hvis ETS feiler for ett produkt, kan dere bestemme at baseline brukes og produktet flagges.
+- **medium** FR-24 har konsekvenser som ikke kan testes (FR-24, SM-C1) — «rundt 20», «de fleste» og «noen» kan ikke testes. SM-C1 forutsetter at minst ett produkt taper for ETS, men FR-24 krever det ikke. Det syntetiske datasettet har heller ikke noe produkt med 24–29 mnd, som er hovedtilfellet i FR-16. *Fix:* Skriv tall: «20 produkter med 36 mnd, hvorav minst 15 med trend og minst 2 flate med høy støy. Ett med 8 mnd, ett med 18 mnd og ett med 26 mnd. På datasettet får minst ett produkt flagget *ETS taper*.» Tallene er eksempler.
+- **medium** Konsekvenser formulert som adjektiver (FR-20 «tydelig skille», FR-21 «vises det tydelig», NFR-7 «vanlig bærbar PC») — ingen av dem kan sjekkes i en test. *Fix:* FR-20: «Prognosedelen tegnes med stiplet linje og en vertikal markør ved første prognosemåned.» FR-21: «Backtest-tabellen viser teksten ‹ETS er ikke backtestet (under 30 mnd historikk)› i ETS-kolonnen.» NFR-7: oppgi maskinen der målingen gjøres, for eksempel utviklerens PC, med spesifikasjon i README.
+- **medium** Den testbare betingelsen i NFR-4 strider mot ordlista (NFR-4, §3) — «Ingen engelske brukertekster» brytes av begrepene i ordlista selv: *ETS*, *WAPE*, *backtest*, *baseline* og *ETS taper*. *Fix:* Skriv «Ingen engelske brukertekster, bortsett fra fagbegrepene i ordlista (§3).»
+- **low** «ETS slår baseline» er ikke definert ved like WAPE (FR-21, FR-22, UJ-3) — FR-17 bruker «høyere WAPE» (streng ulikhet), men det står ikke hvordan «slår» og «n av m» regner like verdier. *Fix:* Skriv «ETS slår baseline = ETS har strengt lavere WAPE.»
+- **low** Merknaden i FR-12 har ingen fastsatt tekst (FR-12, FR-21) — «vises alltid» kan testes, men bare hvis testen vet hva den skal se etter. *Fix:* Skriv merknadsteksten ordrett i FR-12.
+- **low** «Uendret via API» er ikke operasjonalisert (FR-6, F11) — det står ikke om det betyr like JSON-svar, like tall eller like rader. *Fix:* Skriv «Svarene fra `GET /api/datasets/{id}/products` og `…/products/{produkt_id}` er like før og etter omstart.»
+
+## Ærlig omfang — sterk
+
+Omfanget er eksplisitt. §6 er en reell liste over ikke-mål, og §7.2 lister det som er utenfor v1. Flere FR-er har egne avsnitt «Utenfor omfang» (FR-6, FR-10, FR-12). Tolkninger som ikke stod i kildene, er samlet og bekreftet i §11. Antallet åpne punkter (2 åpne spørsmål, ingen ubekreftede antakelser) passer til at PRD-en skal gi grønt lys til bygging.
+
+### Funn
+- **low** Noen implisitte avgrensninger står ikke i teksten (§7.2) — filstørrelse eller maks antall produkter utover NFR-7, flere filer per opplasting, nettleserstøtte og eksport fra dashbordet er ikke nevnt. Leseren må selv slutte seg til at de er utenfor. *Fix:* Legg til ett punkt i §7.2: «Én fil per opplasting, ingen eksport fra dashbordet og ingen garanti utover 200 produkter × 36 mnd. Testet i [nettleser].»
+
+## Nytte for neste steg — tilstrekkelig
+
+PRD-en er toppen av kjeden (arkitektur → epics → stories), så denne dimensjonen veier tungt. Ordliste, kontinuerlige ID-er (FR-1–25, NFR-1–8, UJ-1–4, SM-1–3, SM-C1–C2), «Realiserer UJ-x» og «Verifiseres av Fx» på hvert FR og §9 gir et godt grunnlag å hente ut stories fra. Hver UJ har Kari som navngitt hovedperson. Svakheten er at ordlista lover mer enn teksten holder (se mekaniske merknader), og at noen FR-er er avhengige av en tabell i seksjonens innledning («slik tabellen over viser», FR-16). Det svekker FR-16 når det leses alene.
+
+### Funn
+- **medium** **Horisont** brukes i to betydninger (ordlista: *Horisont*; FR-13, addendum `h=1`) — ordlista definerer Horisont som «de 6 månedene etter siste måned … Fast i v1», mens FR-13 sier «horisont 1 måned». En story som henter ut FR-13, får et begrep som motsier ordlista. *Fix:* Skriv i FR-13 «hver opprinnelse prognoserer 1 måned frem», som i ordlista under *Backtest*, eller innfør et eget begrep, for eksempel *backtest-steg*.
+- **medium** «Datasett» brukes om både den lagrede opplastingen og en fil (ordlista: *Datasett*, *Syntetisk datasett*; FR-23, FR-25, NFR-7) — *Datasett* er «én godkjent CSV-opplasting», men *Syntetisk datasett* er en generert fil (FR-23: «byte-identiske filer»). NFR-7 sier «generert datasett av denne størrelsen» om en fil som ennå ikke er lastet opp. FR-25 må derfor si «lastes … inn som et datasett». *Fix:* Gi fila et eget navn, for eksempel *syntetisk CSV-fil*, og reserver *Datasett* for det lagrede objektet. Da kan FR-25 si «den syntetiske CSV-fila lastes inn og blir et datasett».
+- **low** FR-16 avhenger av tabellen i §4.4-innledningen — «slik tabellen over viser» bryter mot at hver seksjon skal kunne leses alene. *Fix:* Flytt tabellen inn i FR-16, eller gjenta de tre radene som konsekvenser.
+- **low** UJ-4 og SM-ene mangler i §9 (§9) — UJ-1, UJ-2 og UJ-3 er med, men ikke UJ-4. SM-1–SM-3 er ikke sporet til brief §3/§6. *Fix:* Legg UJ-4 til i raden for §4.1 del 1 (lagring). Legg SM-1/SM-2 til i raden for §6 Suksesskriterier.
+
+## Passer formen — sterk
+
+Dette er et lokalt verktøy for én bruker med et meningsfullt dashbord. Fire korte brukerreiser er riktig dosering. De bærer reelle detaljer (semikolon, radnumre, flagg, «17 av 18») uten å bli overformalisert. Kapabilitetsspesifikasjonen i §4 er hovedbæreren, og det passer formen. Addendumet holder teknologien utenfor kravene, men binder dem sammen. Det er riktig for en PRD som skal videre til arkitektur.
+
+### Funn
+Ingen.
+
+## Mekaniske merknader
+
+**Ordliste-drift.** §0 sier at «resten av dokumentet bruker dem uten synonymer». Det holder ikke helt:
+
+- *Prediksjonsintervall* kalles også «usikkerhetsintervall» (§1), «intervallet» (UJ-1, UJ-3, F10), «spenn» (UJ-1 klimaks) og «skyggelagt bånd» (UJ-1, FR-20). «Spennet» i FR-12 og FR-21 betyr noe annet, nemlig forskjellen mellom scenariototaler. *Fix:* Bruk *prediksjonsintervall* i kravtekst, og «spennet mellom scenariototalene» i FR-12.
+- *Sesongnaiv baseline* kalles også «baseline» (FR-17, FR-19, FR-21, §4.4), «enkel referanse» og «enkel baseline» (§1) og «samme måned i fjor» (§2.1, UJ-3). Det kolliderer med historikknivået *baseline*. «Bare baseline-backtest» og «historikknivå *baseline*» står tett i §4.4/FR-16. *Fix:* Bruk alltid «sesongnaiv baseline» i FR-tekst og skriv historikknivået i kursiv. Vurder å kalle nivået *sesongnaiv*.
+- *Prognose* får uoffisielle varianter: «prognoseserie» (FR-8, F3, ordrett fra briefen og dermed ok i F3), «ETS-prognose», «sesongnaiv prognose» (FR-10), «backtest-prognoser» (FR-13), «forventet prognose» (UJ-1 steg 4, som blander scenarionavnet inn) og «prognosekjøring» (FR-7). *Fix:* Legg «prognoseserie» til i ordlista som synonym for prognosen til ett produkt. I UJ-1 steg 4, skriv «P50 for horisonten».
+- *Scenario*-navn skrives med stor forbokstav i ordlista og FR-11-overskriften, men med liten i FR-11-konsekvensene («pessimistisk ≤ forventet»). Det er ufarlig, men bør gjøres likt, siden scenarionavnene er grensesnittekst.
+- «Nok historikk» (FR-8) er ikke definert. Skriv «historikknivå *ets* eller *baseline*».
+- *Valideringsrapport* i ordlista mangler «status (godkjent/avvist)», som FR-1 og FR-18 bruker.
+- UI-delene *produktliste*, *datasettvelger*, *scenariotabell*, *backtest-tabell*, *WAPE-oversikt* og *topplinje* (FR-18) er ikke i ordlista. De er bare nevnt under *Dashbord*. Stories vil bruke dem som komponentnavn. Legg dem inn.
+- «Kari» og «brukeren» (FR-7, §6) brukes om hverandre. Det er ufarlig.
+- UJ-2 sier «hver feil med radnummer, for eksempel «Duplikat: P-104, 2025-03»», men eksemplet har ikke radnummer. FR-3 krever bare produkt og måned for duplikater. Juster ordlyden i UJ-2.
+
+**ID-kontinuitet.** FR-1–FR-25, NFR-1–NFR-8, UJ-1–UJ-4, SM-1–SM-3, SM-C1–SM-C2 og F1–F14 er kontinuerlige og unike. Alle interne kryssreferanser (FR-4 → FR-5, FR-9 → FR-15, FR-14 → FR-22, FR-12 → FR-21) peker riktig. Referansene «Beslutningslogg: *Total WAPE*» og «*Sortering av produktlisten*» finnes i research-plan.md. Tilknytningen F10 → FR-18–FR-22 i §8.1 er videre enn det F10 faktisk sier (se funn under «Hvor tydelig ‹ferdig› er»).
+
+**Antakelser.** Det finnes ingen inline `[ASSUMPTION]`-tagger. §11 fungerer som indeks over bekreftede tolkninger. Rundtur kontrollert: alle 11 punktene i §11 finnes igjen inline i riktig FR/NFR, og ingen inline-tolkninger mangler i §11. To av dem («Total WAPE», «Sortering») er ført inn i beslutningsloggen, som §11 sier. FR-19 sier «Beslutningslogg: …» inline, mens FR-18 og FR-21 ikke merker at de er tolkninger. Det er ufarlig fordi §11 dekker dem.
+
+**Påkrevde seksjoner.** Alle seksjonene som trengs for denne typen PRD og dette nivået finnes: visjon, bruker/UJ, ordliste, FR, NFR, ikke-mål, omfang, suksess med motvekter, sporbarhet, åpne spørsmål og tolkninger. Addendumet er avgrenset og lekker ikke krav.
+
+**Addendum.** Det er konsistent med PRD-en. `level=[80]` stemmer med FR-9, og `n_windows=6, h=1, step_size=1` med FR-13. Det eneste avviket er `h=1` mot ordlistas *Horisont* (se funn over).
