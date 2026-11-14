@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UX-designvalidering: G96-ellingsen</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+<style>
+  .verdict-pending { background: var(--muted); }
+  .merged-note { margin-top: 6px; font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>G96-ellingsen — valideringsrapport for UX-design</h1>
+        <div class="subtitle">_bmad-output/planning-artifacts/ux-designs/ux-G96-ellingsen-2026-11-14/ (DESIGN.md + EXPERIENCE.md)</div>
+      </div>
+    </header>
+
+    <div class="synthesis">
+      <p><strong>Rubrikken: adequate. Kontrakten er brukbar etter at de høye funnene er rettet.</strong> Paret er stramt og godt forankret i kildene. Alle fire brukerreisene finnes med navnene ordrett fra PRD-en, med protagonist, nummererte steg og klimaks. Alle <code>{token}</code>-referansene resolver, alle farger har hex, seksjonsrekkefølgen følger spesifikasjonen, og de ordrette tekstene for FR-20 og FR-21 er riktige. Tre punkter tvinger likevel en nedstrøms konsument til å gjette eller bryte et krav: dommerlinjen i backtest-tabellen er binær og motsier PRD-ordlista om like og udefinerte WAPE-verdier, inndatakantene har 1,38:1 og bryter WCAG 1.4.11, og det finnes ingen modell for vertikal scrolling eller noe høydebudsjett for 720 CSS-px. Resten er middels og lave presiseringer: manglende feilmeldingsmaler, interne motsetninger i DESIGN.md, komponentnavn som ikke stemmer mellom filene, og noen manglende tilstander.</p>
+      <p><strong>Tilgjengelighetsreviewen (godkjent med endringer, 5 høye) skjerper bildet.</strong> Tre saker som rubrikken førte som middels, er reelle AA-brudd hvis spinen implementeres som skrevet, og løftes derfor til høy: fokusringen arver shadcn sin 50 %-ring (2,27:1), grafen er både <code>role="img"</code> og fokuserbar og mangler tekstalternativ for historikken, og fokus går tapt etter avvisning, feil og «Lukk». I tillegg kommer reflow ned til 320 CSS-px som ny høy sak. Begge reviewerne fant inndatakanten, fokusringen, båndkontrasten, grafmodellen, fokus etter avvisning og tidsavbruddet; de er slått sammen nedenfor. Etter sammenslåing står spinen med 7 høye funn, og 5 av dem gjelder tilgjengelighet. Mockup-renderingen bekrefter at panelhoder og advarselstekst mangler, og fant én faktisk inkonsistens i eksempeltallene. Ingen funn er kritiske.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card"><div class="dim-name">Flow coverage</div><div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div></div>
+      <div class="dim-card"><div class="dim-name">Token completeness</div><div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div></div>
+      <div class="dim-card"><div class="dim-name">Component coverage</div><div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div></div>
+      <div class="dim-card"><div class="dim-name">State coverage</div><div class="dim-verdict" style="color: var(--verdict-thin)">thin</div></div>
+      <div class="dim-card"><div class="dim-name">Visual reference coverage</div><div class="dim-verdict" style="color: var(--muted)">venter på promotering</div></div>
+      <div class="dim-card"><div class="dim-name">Bloat &amp; overspecification</div><div class="dim-verdict" style="color: var(--verdict-strong)">strong</div></div>
+      <div class="dim-card"><div class="dim-name">Inheritance discipline</div><div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div></div>
+      <div class="dim-card"><div class="dim-name">Shape fit</div><div class="dim-verdict" style="color: var(--verdict-strong)">strong</div></div>
+    </div>
+
+    <!-- 1 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>1. Flow coverage</h2><span class="verdict-pill verdict-adequate">adequate</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>UJ-1 til UJ-4 i PRD §2.3 finnes alle i <em>Key Flows</em> med samme navn, med Kari som protagonist, nummererte steg og uthevet klimaks. FR-ene som gjelder UI er dekket, unntatt FR-2/FR-3 og FR-4, som bare er delvis dekket fordi tekstmalene mangler.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Feilmeldingene for avvist fil har bare to eksempler</h3><span class="finding-location">EXPERIENCE · Voice and Tone, Key Flows UJ-2</span></header>
+            <div class="finding-note">FR-2 og FR-3 gir minst fem andre feiltyper uten mal: manglende kolonne, <code>maaned</code> i feil format, tom celle, fil uten datarader og skilletegn som ikke gjenkjennes. Story-dev må finne på ordlyden, og NFR-4 og Playwright-testene får ingenting å sjekke mot.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Legg en tabell «Feilmeldinger (FR-2, FR-3)» under <em>Faste tekster</em> med én mal per regel, for eksempel «Mangler påkrevd kolonne: <code>antall</code>», «Rad {r}: maaned må ha formatet ÅÅÅÅ-MM», «Rad {r}: tom celle i <code>{kolonne}</code>» og «Fila har ingen datarader».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Advarselsteksten for utfylte måneder (FR-4) mangler mal</h3><span class="finding-location">EXPERIENCE · Component Patterns, Valideringsrapport</span></header>
+            <div class="finding-note">Det står bare «én per produkt med månedene listet». Mockup-renderingen måtte finne opp teksten (se egen seksjon).</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett formen, for eksempel «P-031: 2 måneder fylt inn med 0 (2025-03, 2025-07)».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Autovalg i UJ-1 steg 4 er ikke merket som avvik fra PRD-en</h3><span class="finding-location">EXPERIENCE · Key Flows UJ-1</span></header>
+            <div class="finding-note">I PRD-en velger Kari det første produktet selv. Avviket er bevisst (<code>.memlog.md</code>), men ikke merket.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Én setning i UJ-1 eller under <em>Åpne punkter</em> om at autovalg erstatter PRD-steget.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">UJ-1 og UJ-4 har ingen feillinje</h3><span class="finding-location">EXPERIENCE · Key Flows</span></header>
+            <div class="finding-note">Tilstandene <em>Kjøring feilet</em> og <em>Ingen kontakt med backend</em> finnes, men flytene viser ikke til dem.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Én linje per flyt, for eksempel «Feil: kjøringen feiler → rød rapport, forrige datasett står (se <em>Kjøring feilet</em>).»</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 2 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>2. Token completeness</h2><span class="verdict-pill verdict-adequate">adequate</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Alle tokens er definert, alle 16 fargene har hex, og alle <code>{path}</code>-referansene resolver. Kontrastene er regnet etter WCAG-luminans av begge reviewerne, og tallene stemmer overens. Svakhetene ligger i det som er arvet fra shadcn uten overstyring: inndatakant og fokusring. Tilgjengelighetsreviewen løfter fokusringen fra middels til høy.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Kant på inndatafelt (søk, datasettvelger) er 1,38:1 og bryter 1.4.11</h3><span class="finding-location">DESIGN · frontmatter colors (border, arvet input), Components: Input, Select</span></header>
+            <div class="finding-note"><code>input</code> arves fra shadcn og er ikke overstyrt. <code>#D9DCE0</code> gir 1,38:1 mot hvitt, og shadcn-standarden er enda svakere (~1,26:1). Søkefeltet og Select-triggeren identifiseres bare av kanten, og 1.4.11 krever 3:1.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Legg inn eget token <code>input</code> på minst 3:1, for eksempel <code>#767C85</code> (4,21:1 mot hvitt, 3,92:1 mot surface-subtle) eller <code>#8A919A</code> (3,18:1). Behold <code>border</code> for paneler og skillelinjer, og si i <em>Components</em> at Input og Select bruker <code>{colors.input}</code>.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§2, high) og tilgjengelighet (H2, high).</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Fokusringen arver shadcn sin 50 %-ring og feiler 1.4.11 / svekker 2.4.7</h3><span class="finding-location">DESIGN · frontmatter ring; EXPERIENCE · Accessibility Floor</span></header>
+            <div class="finding-note">shadcn v4 bruker <code>focus-visible:ring-ring/50</code> uten offset. Med <code>#1F5FAD</code> blir ringen effektivt <code>#8FAFD6</code>: 2,27:1 mot hvitt, 2,81:1 rundt primærknappen og 2,14:1 i valgt rad. Spinen oppgir bare farge, ikke bredde, offset eller opasitet, og sier at komponentene brukes uendret.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett fokusindikatoren som token: 2 px heltrukken <code>#1F5FAD</code> i 100 % opasitet med 2 px offset i <code>{colors.background}</code>. Overstyr <code>ring-ring/50</code> globalt.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§2, medium) og tilgjengelighet (H1, high). Løftet til høy.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">P10–P90-båndet har 1,42:1 mot hvitt (1.4.11)</h3><span class="finding-location">DESIGN · frontmatter chart-band, Colors → Grafen</span></header>
+            <div class="finding-note">Båndet bærer informasjon (FR-20), og det samme feltet brukes i forklaringen. Scenariotabellen dekker verdiene, så det er ikke blokkerende, men grafen alene oppfyller ikke 1.4.11.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Tegn P10- og P90-kanten som 1 px heltrukne linjer i et nytt token <code>chart-band-edge</code>, for eksempel <code>#4A74B5</code> (4,71:1). Gi forklaringsfeltet samme kant.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§2, medium) og tilgjengelighet (M1, medium).</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Kontrasttallene for viktige kombinasjoner er ikke samlet</h3><span class="finding-location">DESIGN · Colors</span></header>
+            <div class="finding-note">EXPERIENCE sier «Kontrastverdiene står i DESIGN.md», men bare tre tall står der. Knapp, rød rapport, valgt rad, undertekst på grå flate og horisontmarkør mot båndet mangler. «Minst 6:1» gjelder bare mot hvitt (5,75 mot surface-subtle).</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Legg inn en kontrasttabell i DESIGN <em>Colors</em>. Begge reviewfilene har ferdige tall.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title"><code>fontVariantNumeric</code> er ikke en nøkkel i spesifikasjonen</h3><span class="finding-location">DESIGN · typography.table</span></header>
+            <div class="finding-note"><code>design-md-spec.md</code> tillater bare fontFamily, fontSize, fontWeight, lineHeight og letterSpacing.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Flytt <code>tabular-nums</code> til prosaen, der det allerede står.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Layoutverdier står som tall i prosa, ikke som tokens</h3><span class="finding-location">EXPERIENCE · Responsive &amp; Platform, State Patterns</span></header>
+            <div class="finding-note">260 px for produktlisten, 320 px for feillisten, 50 vh, 80 % slør, strek 6/4, striper på 3 og 4 px.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Gjør i det minste <code>sidebar-width-compact: 260px</code> og <code>report-max-height: 320px</code> til spacing-tokens.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 3 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>3. Component coverage</h2><span class="verdict-pill verdict-adequate">adequate</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Alle hovedkomponenter finnes i begge filene, men navnene stemmer ikke helt, og noen hjelpekomponenter er bare nevnt i forbifarten. Grafmodellen løftes til høy fordi tilgjengelighetsreviewen viser at den gir faktiske brudd på 4.1.2 og 1.1.1.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Grafen er både <code>role="img"</code> og fokuserbar med piltaster, og historikken mangler tekstalternativ</h3><span class="finding-location">EXPERIENCE · Interaction Primitives, Accessibility Floor → Grafen, Component Patterns → Graf</span></header>
+            <div class="finding-note">(a) <code>role="img"</code> gjør barna presentasjonelle, så tooltip-innholdet piltastene flytter mellom, blir aldri lest opp. En interaktiv kontroll med bilderolle bryter 4.1.2, og i lesemodus fanger skjermleseren piltastene. (b) «Alle tallene finnes også i scenariotabellen» stemmer ikke: de historiske månedsverdiene (12–48 måneder) finnes bare i grafen (1.1.1/1.3.1).</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Velg én modell. Anbefalt: <code>role="img"</code> med <code>aria-label</code>, ikke fokuserbar, og en <code>Collapsible</code> «Vis historikk som tabell» (Måned · Faktisk). Alternativt <code>role="group"</code> + <code>aria-roledescription="graf"</code>, instruksjon i <code>aria-describedby</code> og en <code>aria-live="polite"</code>-region for måneden som har fokus. Oppdater tab-rekkefølgen tilsvarende.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§3, medium) og tilgjengelighet (H3, high). Løftet til høy.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Komponentnavnene er ikke like i de to filene</h3><span class="finding-location">DESIGN · Components; EXPERIENCE · Component Patterns</span></header>
+            <div class="finding-note">«Prognosegraf» mot «Graf», «Produktrad» mot «Produktliste». Topplinje, Flagg-merke og Lasteboks mangler rad i EXPERIENCE.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Bruk PRD-navnet «Graf» i DESIGN, eventuelt «Produktliste (rad)». Legg inn rader i EXPERIENCE for Flagg-merke, Lasteboks og Topplinje.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Kolonnene i backtest-utvidelsen per opprinnelse er ikke definert</h3><span class="finding-location">EXPERIENCE · Component Patterns → Backtest-tabell</span></header>
+            <div class="finding-note">FR-21 og NFR-5 krever at WAPE kan regnes etter, og UJ-3 steg 3 forutsetter sammenligning per måned.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett kolonnene, for eksempel <em>Opprinnelse · Måned · Faktisk · P50 baseline · P50 ETS</em>, eventuelt med |feil| og en sumrad. Si hva som vises når det bare finnes baseline-backtest.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Teksten i panelhodene er ikke fastsatt</h3><span class="finding-location">DESIGN · panel-header; EXPERIENCE · Information Architecture</span></header>
+            <div class="finding-note">NFR-4 sier at Playwright-testen sjekker overskriftene, men ingen overskrift er bestemt, og det står ikke hvor valgt <code>produkt_id</code> vises. Mockup-renderingen måtte finne dem opp.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Legg overskriftene under <em>Faste tekster</em>, for eksempel «Prognose – {produkt_id}», «Scenarioer», «Backtest (siste 6 måneder)» og «Produkter».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Komponenter som brukes, er ikke listet i DESIGN</h3><span class="finding-location">DESIGN · Components</span></header>
+            <div class="finding-note">Skeleton, spinner, hopplenke, «Lukk», «Tøm søk» og «Vis alle advarsler» mangler. <code>Alert</code> er listet, men brukes ingen steder.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Utvid listen, eller si hvilken variant de har. Fjern <code>Alert</code>, eller si at rapporten bygger på den.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Tooltip og forklaring i grafen har ingen visuell spesifikasjon</h3><span class="finding-location">DESIGN · Components</span></header>
+            <div class="finding-note">Begge er Recharts-komponenter, ikke shadcn <code>Tooltip</code>.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Én linje hver: flate, kant og typografi.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 4 -->
+    <section class="dimension">
+      <details open>
+        <summary><h2>4. State coverage</h2><span class="verdict-pill verdict-thin">thin</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>De viktigste tilstandene er dekket: første oppstart, kjøring pågår, godkjent, avvist med over 15 feil, kjøring feilet, ingen kontakt, lasting av produkt, historikknivåene, <em>ETS taper</em>, søk uten treff og valgt produkt utenfor filteret. Men tre av de høye funnene ligger her: dommerlinjen, høydebudsjettet og fokus etter avvisning. I tillegg mangler flere overganger (bytte av datasett, tidsavbrudd, feil ved henting av ett produkt).</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Dommerlinjen i backtest-tabellen har bare to verdier</h3><span class="finding-location">EXPERIENCE · Component Patterns → Backtest-tabell</span></header>
+            <div class="finding-note">«Strengt lavere WAPE gir slår» gjør like WAPE-verdier til «taper». Det motsier PRD §3 og §11.2, der like verdier verken er seier eller tap. Det finnes heller ingen tekst for udefinert WAPE (Σ faktisk = 0, FR-14). En konsument vil skrive <code>etsWape &lt; baseWape ? slår : taper</code>, og det er feil.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fire tilfeller: «ETS slår baseline», «ETS taper mot baseline», «ETS og baseline har lik WAPE» og «Kan ikke sammenlignes (WAPE er udefinert når faktisk salg er 0)». Legg inn tilsvarende rader i <em>State Patterns</em>.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Ingen modell for vertikal scrolling og intet høydebudsjett</h3><span class="finding-location">DESIGN · Layout &amp; Spacing; EXPERIENCE · Responsive &amp; Platform</span></header>
+            <div class="finding-note">Topplinje (56 px), godkjent rapport (~200 px), graf (360 px), tabeller (~300 px) og WAPE-linja er nesten 950 px. En laptop med 1920×1080 og 150 % skalering gir 1280×720 CSS-px. Det står ikke om siden eller bare listen scroller, og klimakset i UJ-1 (sumraden) kan havne under bretten.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett minimumshøyde (for eksempel 720 px) og modell: siden scroller, og listen er <code>sticky</code> med høyde <code>100vh − topplinje − WAPE</code>. Vurder å gjøre godkjent rapport sammenfoldbar til oppsummeringslinja.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">Fokus går tapt etter avvist fil, feilet kjøring, backend-feil og «Lukk» (2.4.3)</h3><span class="finding-location">EXPERIENCE · State Patterns (Fil avvist), Accessibility Floor → Inert under kjøring</span></header>
+            <div class="finding-note">Bare «Godkjent etter kjøring» flytter fokus. Når <code>inert</code> settes mens <strong>Last opp CSV</strong> har fokus, havner fokus på <code>&lt;body&gt;</code> og kommer ikke tilbake. Ved avvisning og feil må tastaturbrukeren tabbe seg ned til feillisten. Det står heller ikke hva «Lukk» viser etterpå: rapporten er «alltid synlig for valgt datasett» (FR-18), så det er uklart om den godkjente rapporten kommer tilbake.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Én regel for alle utfall: når sløret fjernes, flytt fokus til rapportoverskriften (<code>tabindex="-1"</code>). «Lukk» viser rapporten for valgt datasett igjen. Reviewerne foreslår ulikt fokusmål etter «Lukk» (rubrikken: rapportoverskriften, tilgjengelighet: <strong>Last opp CSV</strong>). Velg rapportoverskriften når en rapport kommer tilbake, ellers <strong>Last opp CSV</strong>. Se også L6 om dobbel annonsering.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§4, medium) og tilgjengelighet (H4, high). Løftet til høy.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Ingen tilstand for lasting ved bytte av datasett</h3><span class="finding-location">EXPERIENCE · Component Patterns → Datasettvelger, UJ-4 steg 3</span></header>
+            <div class="finding-note">Rapport, liste og WAPE-oversikt hentes på nytt, men det står ikke hva som vises i mellomtiden.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Raden «Datasett byttes»: Skeleton i rapport, liste og WAPE-linje, ingen slør, Select er aktiv.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">«{n} produkter» i lasteboksen krever et arkitekturvalg som ikke er tatt</h3><span class="finding-location">EXPERIENCE · State Patterns → Kjøring pågår</span></header>
+            <div class="finding-note">FR-7 sier én forespørsel, så frontend vet ikke n før svaret kommer. UJ-1 steg 2 viser «200 produkter» med en gang.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Bestem at frontend teller unike <code>produkt_id</code> i CSV-en før opplasting, ellers bruk bare den generelle teksten. Si det eksplisitt.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Ingen tidsavbrudd for kjøringen, og siden kan bli låst for alltid</h3><span class="finding-location">EXPERIENCE · State Patterns → Kjøring pågår («ingen avbrytknapp»)</span></header>
+            <div class="finding-note">Hvis forespørselen henger forbi NFR-7-grensen, er hele siden <code>inert</code> uten utvei, i praksis en felle for alle brukere (jf. 2.1.2). 2.2.1 gjelder ikke, siden dette er ventetid.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Klientgrense på for eksempel 120 s som går til <em>Kjøring feilet</em> med en norsk melding og fokusregelen over.</div>
+            <div class="merged-note">Funnet av begge: rubrikk (§4, low) og tilgjengelighet (M6, medium). Løftet til middels.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">WAPE-oversikten mangler tilstand for m = 0</h3><span class="finding-location">EXPERIENCE · Component Patterns → WAPE-oversikt</span></header>
+            <div class="finding-note">Når ingen produkter har backtest for begge modellene, er total WAPE udefinert.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> «Total WAPE: ingen produkter har backtest for begge modellene».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Ingen tilstand for når henting av ett produkt feiler</h3><span class="finding-location">EXPERIENCE · State Patterns</span></header>
+            <div class="finding-note"><em>Ingen kontakt med backend</em> ligger bare i rapporten.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Dempet feillinje i grafområdet med «Prøv igjen».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Backtest-utvidelsen er ikke beskrevet for bare baseline eller ingen backtest</h3><span class="finding-location">EXPERIENCE · Component Patterns → Backtest-tabell</span></header>
+            <div class="finding-note">Det står ikke om knappen vises, eller om «(6)» stemmer.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Skjul knappen ved <em>Ingen backtest</em>, vis bare baseline-kolonnen ved baseline-backtest.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Avbrutt filvelger og fil som ikke er CSV er ikke beskrevet</h3><span class="finding-location">EXPERIENCE · State Patterns</span></header>
+            <div class="finding-note">Kari kan velge «Alle filer» i filvelgeren.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Ved avbrudd skjer ingenting. En fil som ikke er CSV, gir vanlig avvisning med feilmeldingen for skilletegn eller kolonner.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Piltastene gir et blink av Skeleton for hvert tastetrykk</h3><span class="finding-location">EXPERIENCE · Interaction Primitives → Produktlisten</span></header>
+            <div class="finding-note">Valg skjer med en gang, og «forrige produkt blir ikke stående». Henger sammen med tilgjengelighetsfunn M2(b), som også ber om debounce og <code>aria-busy</code>.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Hent nabo-produktene på forhånd (<code>prefetchQuery</code>), eller vis Skeleton først etter rundt 150 ms.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 5 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>5. Visual reference coverage</h2><span class="verdict-pill verdict-pending">venter på promotering</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Mockupene er laget, men ligger fortsatt i <code>.working/key-dashbord.html</code> (godkjent tilstand med P-109 valgt) og <code>.working/key-avvist.html</code> (avvist rapport, UJ-2). De er ikke promotert til <code>mockups/</code>, så kategorien vurderes ikke ennå. Til sammen dekker de UJ-1, UJ-2 og UJ-3 visuelt. Funnene fra selve renderingen står i egen seksjon nederst.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Linja «Composition reference» mangler i IA</h3><span class="finding-location">EXPERIENCE · Information Architecture</span></header>
+            <div class="finding-note">Begge eksemplene har «→ Composition reference: mockups/… Spine wins on conflict.»</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Legg den inn når mockupene er promotert. Vurder også en mockup av lasteboksen og av historikknivå <em>ingen</em>.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 6 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>6. Bloat &amp; overspecification</h2><span class="verdict-pill verdict-strong">strong</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Paret er stramt. <em>Tall- og datoformat</em> fortjener plassen sin (NFR-5), og PRD-en gjentas lite.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Tilstanden <em>Ingen produkt valgt</em> kan ikke oppstå</h3><span class="finding-location">EXPERIENCE · State Patterns</span></header>
+            <div class="finding-note">PRD §3 sier at et datasett har minst ett produkt, og FR-3 avviser en fil uten datarader.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fjern raden, eller gjør den om til forbigående tilstand før autovalget.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Regler står to steder (driftrisiko)</h3><span class="finding-location">DESIGN · Colors og Components; Layout &amp; Spacing og EXPERIENCE · Responsive &amp; Platform</span></header>
+            <div class="finding-note">Grafreglene står i både <em>Colors</em> og <em>Components</em>. Reflow-regelen står i begge filene, og trinnet 1024–1279 bare i EXPERIENCE.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Behold detaljene ett sted, og la det andre bare henvise.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 7 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>7. Inheritance discipline</h2><span class="verdict-pill verdict-adequate">adequate</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Kildene resolver. Brukerreisenavn, FR-20- og FR-21-tekster, scenarionavn, flaggnavn og ordlisteord er ordrette, og søket er riktig merket som tillegg. Svakhetene er interne motsetninger i DESIGN.md og noen små avvik fra PRD-ordlyden som ikke er merket.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Rødt brukes i en tilstand DESIGN ikke tillater</h3><span class="finding-location">EXPERIENCE · State Patterns → Ingen kontakt med backend</span></header>
+            <div class="finding-note">DESIGN sier at rødt er forbeholdt «avvist fil eller feilet kjøring».</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Utvid regelen til «avvist, feilet eller utilgjengelig», eller gi tilstanden grå variant.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Regelen for blått motsier seg selv</h3><span class="finding-location">DESIGN · Colors, Do's and Don'ts</span></header>
+            <div class="finding-note">«Bare for valgt og prognose», men blått brukes på primærknapp, fokusring og lenkeknapper.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> «Valgt, prognose og handling (primærknapp, lenkeknapper, fokus)».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Fontvektene motsier hverandre</h3><span class="finding-location">DESIGN · Typography</span></header>
+            <div class="finding-note">«Bare to vekter: 400 og 600», men <code>typography.label.fontWeight: '500'</code>.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Sett label til 400 eller 600, eller skriv tre vekter.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">FR-21 sier «kolonne», spinen har modellene som rader</h3><span class="finding-location">DESIGN · Components → Backtest-tabell</span></header>
+            <div class="finding-note">Teksten er lik, men orienteringen avviker fra kilden.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Si i EXPERIENCE at PRD-ens «kolonne» leses som «raden for ETS».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">«Ordrett som i PRD-en (§11.2)» stemmer ikke for alle linjene</h3><span class="finding-location">EXPERIENCE · Faste tekster</span></header>
+            <div class="finding-note">FR-18-linja er bare «på formen», og FR-12-merknaden siteres ikke.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Siter FR-12 ordrett, og merk FR-18-linja som mal.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">PRD-ens <em>Topplinje</em> inkluderer valideringsrapporten, spinen skiller dem</h3><span class="finding-location">EXPERIENCE · Information Architecture</span></header>
+            <div class="finding-note">Avviket kommer fra PRD-en, men spinen bør velge og si det.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Én setning i IA om at rapporten står som eget felt rett under topplinjen.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">«Spenn Pessimistisk–Optimistisk» er ikke et ordlisteord</h3><span class="finding-location">EXPERIENCE · Component Patterns → Graf</span></header>
+            <div class="finding-note">Ordlista har <em>Prediksjonsintervall</em>. Valget er bevisst (PRD spm. 3), men ikke merket der teksten står.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Kort merknad i raden Graf.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">«i dag kl. 09.42» følger ikke datoformatet</h3><span class="finding-location">EXPERIENCE · Key Flows UJ-1 steg 3</span></header>
+            <div class="finding-note"><em>Tall- og datoformat</em> fastsetter bare «13.11.2026 kl. 09.42».</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Bruk det faste formatet, eller legg til en regel for relativ dato.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Feil kildemerking i Voice and Tone</h3><span class="finding-location">EXPERIENCE · Voice and Tone</span></header>
+            <div class="finding-note">«Rad 418: …» er merket «FR-3, ordrett format», men kommer fra UJ-2-eksempelet.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Endre kilden til «UJ-2-eksempel».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Oppsummeringsmalen mangler regler for n = 1 og k = 0</h3><span class="finding-location">EXPERIENCE · Faste tekster</span></header>
+            <div class="finding-note">«✓ {n} produkter godkjent · {k} flagget (kort historikk)».</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett entall og om «· 0 flagget …» vises eller utelates.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- 8 -->
+    <section class="dimension">
+      <details>
+        <summary><h2>8. Shape fit</h2><span class="verdict-pill verdict-strong">strong</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>DESIGN.md følger den kanoniske seksjonsrekkefølgen, og EXPERIENCE.md har alle standardseksjonene. De to egne seksjonene, <em>Tall- og datoformat</em> og <em>Åpne punkter</em>, fortjener plassen sin.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">DESIGN-frontmatteren har nøkler utenfor spesifikasjonen</h3><span class="finding-location">DESIGN · frontmatter</span></header>
+            <div class="finding-note"><code>status</code>, <code>created</code>, <code>updated</code> og <code>sources</code>. Ufarlig, men en strikt parser kan advare.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Ingen handling nødvendig. Samle dem eventuelt under <code>meta:</code>.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Tilgjengelighet -->
+    <section class="reviewer-section">
+      <details>
+        <summary><h2>Tilgjengelighetsreview</h2><span class="reviewer-source">review-tilgjengelighet.md</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p><strong>Godkjent med endringer.</strong> Spinen er over snittet: ikke-bare-farge er gjennomført, tekstkontrastene holder AA overalt, feilrapporten er forbilledlig, og <code>inert</code>, hopplenke, synlige etiketter og ekte tabeller er spesifisert. Men «shadcn uendret» arver standarder som ikke holder, og grafens tastaturmodell og tekstalternativ henger ikke sammen. Fem forhold gir AA-brudd hvis spinen implementeres som skrevet.</p>
+          <p>Slått sammen med rubrikkfunn og ført under kategoriene over: H1 fokusring (kat. 2), H2 inndatakant (kat. 2), H3 grafmodell (kat. 3), H4 fokus etter avvisning og «Lukk» (kat. 4), M1 båndkontrast (kat. 2) og M6 tidsavbrudd (kat. 4). Funnene under er bare fra denne reviewen.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-high">high</span><h3 class="finding-title">H5. Reflow er bare spesifisert for 200 %, ikke 320 CSS-px, og den festede WAPE-linja spiser viewporten (1.4.10)</h3><span class="finding-location">DESIGN · Layout &amp; Spacing; EXPERIENCE · Responsive &amp; Platform</span></header>
+            <div class="finding-note">400 % på en 1366×768-laptop gir ca. 341×192 CSS-px. WAPE-linja brekker da til 4–5 linjer og tar halve høyden permanent, og produktlisten med «maks 50 vh» blir ~96 px. Lasteboksen og den faste topplinja på 56 px er ikke spesifisert for smal bredde.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Spesifiser reflow ned til 320 CSS-px. Under 1024 px er WAPE-linja og topplinja ikke festet (topplinja bruker <code>min-height</code>), produktlisten får <code>max-height: max(50vh, 240px)</code>, og lasteboksen <code>max-width: calc(100vw - 32px)</code>. Test i Playwright med 320×256.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M2. Roving tabindex er uspesifisert ved filter og ved Tab inn i listen</h3><span class="finding-location">EXPERIENCE · Interaction Primitives → Produktlisten</span></header>
+            <div class="finding-note">Selection-follows-focus er et godkjent APG-mønster og bryter ikke 3.2.1/3.2.2. Men når valgt produkt er filtrert bort, finnes ingen valgt <code>option</code> med <code>tabindex="0"</code>, og Tab inn må aldri bytte produkt. Hvert piltrykk gir forespørsel og Skeleton, og skjermlesere kan lese tomme tilstander.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Tab inn fokuserer valgt rad hvis synlig, ellers første treff uten å velge det. Debounce henting ~200 ms, <code>aria-busy="true"</code> på panelene, og <code>aria-label="Produkter, svakeste først"</code>.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M3. Live-regioner må finnes i DOM før innholdet settes, og lasteboksen bør få fokus</h3><span class="finding-location">EXPERIENCE · Accessibility Floor → Annonsering, State Patterns → Kjøring pågår</span></header>
+            <div class="finding-note">En <code>role="status"</code> som monteres sammen med teksten blir ofte ikke lest opp. Mens alt annet er <code>inert</code>, har skjermleserbrukeren ingenting fokusert.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Permanent tom statusregion utenfor det inerte treet. Lasteboksen som søsken av app-roten med <code>tabindex="-1"</code> og fokus når den vises.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M4. Recharts-tooltipen oppfyller ikke 1.4.13 uten tilpasning</h3><span class="finding-location">EXPERIENCE · Component Patterns → Graf</span></header>
+            <div class="finding-note">Den kan ikke lukkes med Esc, har ingen lukkemekanisme ved tastaturfokus og dekker deler av grafen.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Esc skjuler tooltipen til neste peker- eller piltrykk, og den plasseres så den ikke dekker punktet den beskriver.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M5. Udefinert WAPE «–» leses ikke av skjermleser</h3><span class="finding-location">EXPERIENCE · Tall- og datoformat</span></header>
+            <div class="finding-note">NVDA og JAWS hopper over tankestrek, så cellen leses som tom.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>&lt;span aria-hidden="true"&gt;–&lt;/span&gt;&lt;span class="sr-only"&gt;udefinert&lt;/span&gt;</code> i tabeller, rader og WAPE-linja.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M7. Scrollbare regioner må nås med tastatur (2.1.1)</h3><span class="finding-location">EXPERIENCE · State Patterns → Fil avvist, Responsive &amp; Platform</span></header>
+            <div class="finding-note">Feillisten (opptil hundrevis av rader uten fokuserbare barn), vannrett scrollende tabeller og produktlisten har verken fokuserbar beholder eller navn.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>tabindex="0"</code>, <code>role="region"</code> og <code>aria-label</code> på hver scrollbeholder.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M8. Produktradens tilgjengelige navn er uklart (1.3.1)</h3><span class="finding-location">DESIGN · Components → Produktrad; EXPERIENCE · Component Patterns → Produktliste</span></header>
+            <div class="finding-note">«P-109 24,0 % ETS taper» sier ikke hvilken WAPE prosenten er.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Navn som «P-109, WAPE 24,0 %, flagg: ETS taper», visuelt skjult «WAPE», ikonene <code>aria-hidden</code>. Avklar hvilken WAPE raden viser.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">M9. Kravet til CSV-kolonner er bare usynlig instruks (3.3.2)</h3><span class="finding-location">EXPERIENCE · Accessibility Floor → Etiketter</span></header>
+            <div class="finding-note">Seende brukere får ikke vite formatkravet før fila avvises.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Synlig linje i <code>{typography.caption}</code>: «CSV med kolonnene produkt_id, maaned, antall», og pek <code>aria-describedby</code> dit.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L1. Tab-rekkefølgen tar med «Scenariotabell» som stopp</h3><span class="finding-location">EXPERIENCE · Accessibility Floor → Tastatur</span></header>
+            <div class="finding-note">Statiske tabeller skal ikke være tab-stopp med mindre de scroller (M7).</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fjern den, eller presiser at det er scrollbeholderen. Ta med «Vis alle advarsler», «Lukk» og «Tøm søk».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L2. Horisontmarkøren og etiketten «Prognose →»</h3><span class="finding-location">DESIGN · Colors → Grafen</span></header>
+            <div class="finding-note">Markøren er 2,24:1 der den krysser båndet, og etikettfargen er ikke gitt (i <code>#8A919A</code> blir den 3,18:1 og feiler 4,5:1).</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Etiketten i <code>{colors.muted-foreground}</code>, vurder <code>#6B7480</code> for markøren, pilen <code>aria-hidden</code>.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L3. Landemerker og overskriftsnivåer er ikke spesifisert</h3><span class="finding-location">EXPERIENCE · Accessibility Floor</span></header>
+            <div class="finding-note">1.3.1, 2.4.1, 2.4.6.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, produktlisten som <code>&lt;nav aria-label="Produkter"&gt;</code> eller region, panelhoder som <code>&lt;h2&gt;</code>, hopplenkemål med <code>tabindex="-1"</code>.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L4. Faste høyder mot tekstavstand (1.4.12)</h3><span class="finding-location">DESIGN · topbar-height, Produktrad</span></header>
+            <div class="finding-note">Faste høyder kan klippe tekst ved økt linje- og bokstavavstand.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>min-height</code> på topplinje, rader, flagg og WAPE-linje.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L5. Språk og symboler</h3><span class="finding-location">EXPERIENCE · Voice and Tone</span></header>
+            <div class="finding-note"><code>lang="nb"</code> er riktig, og fagtermene er unntatt 3.1.2. «✓», «→», «≥» og «·» leses rart.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> «✓» og «→» <code>aria-hidden</code>. Vurder skjult tekst for «≥» hvis brukertest viser forvirring.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L6. Dobbel annonsering ved godkjent resultat</h3><span class="finding-location">EXPERIENCE · Accessibility Floor → Annonsering</span></header>
+            <div class="finding-note">Både <code>aria-live="polite"</code> og fokusflytting kan få rapporten lest to ganger.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Velg fokusflytting og dropp live-regionen for rapporten.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L7. Festet bunnlinje kan skjule fokus (2.4.11, WCAG 2.2, ikke i målet)</h3><span class="finding-location">DESIGN · Layout &amp; Spacing</span></header>
+            <div class="finding-note">Fokuserte elementer nederst kan havne under WAPE-linja.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>scroll-padding-bottom</code> lik linjens høyde, og «valgt rad holder seg synlig» som <code>scrollIntoView({block:'nearest'})</code>.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">L8. Tabelldetaljer (1.3.1)</h3><span class="finding-location">EXPERIENCE · Component Patterns (tabeller)</span></header>
+            <div class="finding-note">Mangler <code>&lt;caption&gt;</code>, radhoder og kobling til FR-12-merknaden. Søketelleren annonseres per tastetrykk, og spinneren tar ikke hensyn til <code>prefers-reduced-motion</code>.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> <code>&lt;caption&gt;</code> per tabell, måned og «Sum» som <code>&lt;th scope="row"&gt;</code>, FR-12 via <code>aria-describedby</code>, behold <code>&lt;th scope="row"&gt;ETS&lt;/th&gt;</code> når raden erstattes, debounce telleren.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <!-- Mockup-rendering -->
+    <section class="reviewer-section">
+      <details>
+        <summary><h2>Mockup-rendering</h2><span class="reviewer-source">.working/key-dashbord.html, .working/key-avvist.html</span></summary>
+        <div class="dim-body"><div class="dim-judgment">
+          <p>Å tegne spinen avslører hvor den ikke bestemmer nok. To mockups er rendret rett fra DESIGN.md og EXPERIENCE.md. Der spinen var taus, måtte mocken finne opp et svar, og det er nettopp der to implementasjoner vil sprike. Ett eksempel i EXPERIENCE er dessuten regnet feil. To funn (panelhoder og advarselstekst) bekrefter rubrikkfunn i kategori 3 og 1.</p>
+        </div></div>
+        <div class="findings-list">
+          <article class="finding">
+            <header><span class="badge badge-sev-medium">medium</span><h3 class="finding-title">Eksempelet på historikkfordeling stemmer ikke med «3 flagget (kort historikk)»</h3><span class="finding-location">EXPERIENCE · Component Patterns → Valideringsrapport; Key Flows UJ-1 steg 3</span></header>
+            <div class="finding-note">Eksempelet «ingen 3 · sesongnaiv 15 · ets 182» gir 18 produkter med kort historikk, fordi både <em>ingen</em> og <em>sesongnaiv</em> får flagget kort historikk etter FR-5. UJ-1 sier «3 flagget». Mocken kan ikke vise begge og være konsistent.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Rett eksempelet slik at ingen + sesongnaiv = k, for eksempel «ingen 1 · sesongnaiv 2 · ets 197», og skriv regelen k = ingen + sesongnaiv ved malen.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Raden med kort historikk og WAPE «–» vises ikke i mocken</h3><span class="finding-location">EXPERIENCE · Component Patterns → Produktliste (FR-19)</span></header>
+            <div class="finding-note">Etter FR-19 havner en slik rad rundt plass 21, utenfor mockens 12 rader. Den eneste radvarianten med udefinert verdi har dermed ingen visuell referanse.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Vis raden i en søkefiltrert variant av mocken, eller legg en egen radtilstand i spinen med plasseringen etter FR-19.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Spinen sier ikke om grafen viser hele historikken eller et vindu</h3><span class="finding-location">DESIGN · Components → Prognosegraf; EXPERIENCE · Component Patterns → Graf</span></header>
+            <div class="finding-note">Med 12–48 måneder historikk og fast bredde gir valget svært ulik grafer.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett det, for eksempel «hele historikken pluss 6 prognosemåneder, x-aksen skaleres».</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Spinen sier ikke hvor båndet og den stiplede linja starter</h3><span class="finding-location">DESIGN · Colors → Grafen; EXPERIENCE · Key Flows UJ-1 steg 5</span></header>
+            <div class="finding-note">Mocken valgte at linja og båndet starter i siste faktiske punkt, med markøren ved første prognosemåned. Det er et rimelig valg, men det står ikke i spinen.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Skriv valget inn: P50-linja og båndet starter i siste faktiske punkt, og «Prognose →» står ved første prognosemåned.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">«Produktnavnet i topplinjen (16 px)», men topplinjen har ikke produktnavn</h3><span class="finding-location">DESIGN · Typography</span></header>
+            <div class="finding-note">IA-en legger ikke noe produktnavn i topplinjen. Mocken satte P-109 i grafens panelhode.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Skriv at den største teksten er valgt <code>produkt_id</code> i grafens panelhode, eller legg produktnavnet i topplinjen i IA.</div>
+          </article>
+          <article class="finding">
+            <header><span class="badge badge-sev-low">low</span><h3 class="finding-title">Mocken måtte finne opp panelhoder, advarselstekst og ikon foran advarsler</h3><span class="finding-location">EXPERIENCE · Faste tekster, Component Patterns → Valideringsrapport</span></header>
+            <div class="finding-note">Ingen av dem er fastsatt i spinen. Bekrefter rubrikkfunnene om panelhoder (kat. 3) og FR-4-teksten (kat. 1). Ikonet er nytt.</div>
+            <div class="finding-fix"><strong>Fiks:</strong> Fastsett dem i spinen, gjerne med mockens valg som utgangspunkt, og si hvilket Lucide-ikon advarslene har (eller at de ikke har ikon).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mekaniske notater</h3>
+      <ul>
+        <li>Antall funn etter sammenslåing: critical 0 · high 7 · medium 21 · low 35 (63 i alt). Før sammenslåing: rubrikk 0/3/15/23, tilgjengelighet 0/5/9/8, mockup-rendering 0/0/1/5.</li>
+        <li>Seks saker er slått sammen der begge reviewerne fant det samme: inndatakant 1,38:1, fokusring, båndkontrast, graf <code>role="img"</code>/fokus, fokus etter avvisning og «Lukk», og tidsavbrudd. Den høyeste alvorligheten gjelder. Fokusring, graf og fokus etter avvisning er løftet fra middels til høy, og tidsavbrudd fra lav til middels.</li>
+        <li>Reviewerne er uenige om fokusmål etter «Lukk» (rapportoverskrift mot <strong>Last opp CSV</strong>). Rapporten anbefaler rapportoverskriften når en rapport kommer tilbake.</li>
+        <li>Kontrastberegningene i begge reviewene stemmer overens (1,38, 1,42, 2,24, 3,18, 6,17, 6,37).</li>
+        <li>Kategori 5 vurderes når mockupene er flyttet fra <code>.working/</code> til <code>mockups/</code>.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubrikk: review-rubric.md</span>
+        <span>Øvrige: review-tilgjengelighet.md, mockup-rendering (.working/)</span>
+        <span>DESIGN.md · EXPERIENCE.md</span>
+        <span>Generert: 2026-11-14T20:53+01:00</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

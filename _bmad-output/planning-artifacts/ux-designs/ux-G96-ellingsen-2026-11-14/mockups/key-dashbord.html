@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>PROGNOS – dashbord</title>
+<style>
+/*
+  PROGNOS · key screen: Dashbord, godkjent tilstand (P-109 valgt automatisk, detaljer per opprinnelse utvidet)
+  Mocken illustrerer; spines er kontrakten og gjelder ved konflikt. Styres av:
+  - DESIGN.md: frontmatter (colors inkl. input, chart-band-edge, chart-horizon; typography; rounded; spacing;
+    components: topbar, focus-ring, button-primary, button-link, input-field, panel, panel-header, data-table,
+    product-row-selected, flag-badge, report-approved, wape-overview), Colors (+ kontrasttabell),
+    Typography (ordmerket største tekst, tabular-nums), Layout & Spacing (skisse, 300 px sticky liste,
+    50/50 tabeller, detaljer i full bredde under begge, WAPE festet nederst), Elevation & Depth, Shapes,
+    Components (Topplinje m/ kolonnekrav, Valideringsrapport, Produktliste (rad), Flagg-merke, Graf,
+    Forklaring i grafen, Historikktabell, Scenariotabell, Backtest-tabell, WAPE-oversikt, Hopplenke),
+    Do's and Don'ts.
+  - EXPERIENCE.md: Information Architecture (landemerker og overskrifter), Voice and Tone › Faste tekster
+    (FR-12, FR-18-/FR-5-maler, panelhoder, dommerlinje, WAPE-oversikt), Tall- og datoformat,
+    Component Patterns (Topplinje, Datasettvelger, Valideringsrapport, Søk, Produktliste, Flagg-merke, Graf,
+    Historikktabell, Scenariotabell, Backtest-tabell, Detaljer per opprinnelse, WAPE-oversikt),
+    State Patterns (Godkjent etter kjøring, Flagget ETS taper, WAPE udefinert), Interaction Primitives
+    (listbox), Accessibility Floor (fokusring, etiketter, role=img, tabeller med caption, symboler),
+    Key Flows UJ-1 steg 3–6, UJ-3 steg 1–4.
+*/
+:root{
+  --background:#FFFFFF; --foreground:#1F2328; --surface-subtle:#F6F7F8; --muted-foreground:#5B626B;
+  --border:#D9DCE0; --input:#767C85; --gridline:#ECEEF0; --primary:#1F5FAD; --primary-foreground:#FFFFFF; --primary-subtle:#E8F0FA;
+  --ring:#1F5FAD; --destructive:#B42318; --destructive-subtle:#FDECEA;
+  --chart-history:#3D4450; --chart-forecast:#1F5FAD; --chart-band:#C9DAF0; --chart-band-edge:#4A74B5; --chart-horizon:#6B7480;
+  --font:system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r-sm:2px; --r-md:4px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#E4E6E9;font-family:var(--font);font-size:14px;line-height:1.5;color:var(--foreground);padding:24px 0 48px}
+h1,h2,h3,p,ul,ol{margin:0;padding:0}
+ul,ol{list-style:none}
+button,input{font:inherit;color:inherit}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num,.dt td,.dt tfoot{font-variant-numeric:tabular-nums}
+.ico{flex:none;vertical-align:-2px}
+.muted{color:var(--muted-foreground)}
+.muted-inline{color:var(--muted-foreground);font-weight:400}
+.label{font-size:12px;font-weight:500;line-height:1.4}
+.caption{font-size:12px;font-weight:400;line-height:1.4}
+.mock-caption{width:1280px;margin:0 auto 8px;font-size:12px;color:var(--muted-foreground)}
+.mock-section+.mock-section{margin-top:48px}
+/* Fokusring (components.focus-ring): 2 px heltrukken ring, 2 px hvit offset, full opasitet */
+:focus-visible,.focus-demo{outline:2px solid var(--ring);outline-offset:2px}
+.focus-demo{box-shadow:0 0 0 2px var(--background)}
+
+/* Nettleserramme (ikke en del av produktet) */
+.browser{width:1280px;margin:0 auto;border:1px solid #C4C8CD;border-radius:6px;overflow:hidden;background:var(--background)}
+.chrome{height:36px;background:#EDEEF0;border-bottom:1px solid #C4C8CD;display:flex;align-items:center;gap:6px;padding:0 12px}
+.dot{width:10px;height:10px;border-radius:9999px;background:#C4C8CD}
+.url{margin-left:16px;flex:0 1 420px;height:22px;line-height:22px;padding:0 10px;background:#fff;border:1px solid #D9DCE0;border-radius:4px;font-size:12px;color:var(--muted-foreground)}
+.viewport{position:relative;width:1280px;background:var(--background)}
+.viewport.clip{height:720px;overflow:hidden}
+
+/* Hopplenke: skjult til fokus */
+.skip{position:absolute;left:8px;top:8px;padding:6px 12px;background:var(--primary);color:var(--primary-foreground);border-radius:var(--r-md);font-weight:600;text-decoration:none;z-index:2}
+.skip:not(:focus){width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* Topplinje */
+.topbar{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:6px 16px;background:var(--background);border-bottom:1px solid var(--border)}
+.tb-left{display:flex;align-items:center;gap:24px}
+.tb-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.wordmark{font-size:16px;font-weight:600;line-height:1.4}
+.field-inline{display:flex;align-items:center;gap:8px}
+.select{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 8px 0 10px;background:var(--background);border:1px solid var(--input);border-radius:var(--r-sm);font-size:14px;cursor:pointer;min-width:320px;justify-content:space-between}
+.select .ico{color:var(--muted-foreground)}
+.btn-primary{min-height:32px;padding:0 14px;background:var(--primary);color:var(--primary-foreground);border:0;border-radius:var(--r-md);font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary[disabled]{opacity:.5;cursor:default}
+.btn-link{display:inline-flex;align-items:center;gap:4px;padding:0;background:none;border:0;color:var(--primary);font-size:13px;line-height:1.4;cursor:pointer}
+.btn-link:hover,.btn-link:focus-visible{text-decoration:underline}
+
+/* Hovedflate */
+.main{padding:16px 16px 0}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:16px;margin-top:16px;align-items:start}
+.col-main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.tables{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+
+/* Panel */
+.panel{background:var(--background);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+.panel-header{background:var(--surface-subtle);border-bottom:1px solid var(--border);padding:8px 16px}
+.ph{font-size:14px;font-weight:600;line-height:1.4}
+.panel-body{padding:16px}
+
+/* Valideringsrapport */
+.report{border-radius:var(--r-md);padding:10px 16px}
+.report-approved{background:var(--surface-subtle);border-left:4px solid var(--border)}
+.report-rejected{background:var(--destructive-subtle);border-left:4px solid var(--destructive)}
+.report-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.report-h{font-size:14px;font-weight:600;line-height:1.4}
+.report-rejected .report-h{color:var(--destructive)}
+.report-rejected .report-h .muted-inline{color:var(--foreground)}
+.report-dist{margin-top:2px;font-size:13px;line-height:1.4;font-variant-numeric:tabular-nums}
+.report-approved .btn-link{margin-top:4px}
+.errors{margin-top:8px;max-height:320px;overflow-y:auto;font-size:13px;line-height:1.4;font-variant-numeric:tabular-nums}
+.errors li{padding:3px 0}
+
+/* Produktliste: sticky, høyde = 100vh − topplinje − WAPE-linje (her et 1080 px høyt vindu: 1080 − 56 − 36) */
+.plist{position:sticky;top:0;height:988px;display:flex;flex-direction:column}
+.search{padding:12px 16px 8px;border-bottom:1px solid var(--gridline)}
+.search .label{display:block;margin-bottom:4px}
+.input{width:100%;min-height:32px;padding:0 8px;border:1px solid var(--input);border-radius:var(--r-sm);background:var(--background);font-size:14px}
+.search .caption{margin-top:6px}
+.plist-head{display:flex;justify-content:space-between;padding:6px 16px;background:var(--surface-subtle);border-bottom:1px solid var(--border);font-weight:500}
+.plist-rows{flex:1 1 0;min-height:0;overflow-y:auto}
+.prow{padding:7px 16px 7px 13px;border-bottom:1px solid var(--gridline);border-left:3px solid transparent;font-size:13px;line-height:1.4;cursor:pointer}
+.prow:hover{background:var(--surface-subtle)}
+.prow.sel{background:var(--primary-subtle);border-left-color:var(--primary)}
+.prow.sel .pid{font-weight:600}
+.prow-1{display:flex;justify-content:space-between;align-items:baseline}
+.prow-1 .num{text-align:right}
+.prow-2{display:flex;gap:6px;margin-top:4px}
+.flag{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;background:var(--surface-subtle);color:var(--foreground);border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;font-weight:500;line-height:1.4}
+
+/* Graf */
+.chart-wrap{width:896px}
+.chart{display:block}
+.chart .ax{font-family:var(--font);font-size:12px;fill:#5B626B;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:20px;font-size:12px;line-height:1.4;color:var(--muted-foreground);margin-top:8px}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.chart-panel-actions,.panel-body>.btn-link{margin-top:10px}
+
+/* Datatabeller */
+.dt{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4;font-variant-numeric:tabular-nums}
+.dt th,.dt td{padding:5px 8px;text-align:right;font-weight:400}
+.dt thead th{background:var(--surface-subtle);border-bottom:1px solid var(--border);font-weight:600;vertical-align:bottom}
+.dt .tl,.dt tbody th,.dt tfoot th{text-align:left}
+.dt .sub{display:block;font-size:12px;font-weight:400;color:var(--muted-foreground)}
+.dt tbody tr{border-bottom:1px solid var(--gridline)}
+.dt tbody tr:last-child{border-bottom:0}
+.dt tfoot th,.dt tfoot td{font-weight:600;border-top:1px solid var(--border)}
+.dt .g{border-left:1px solid var(--border)}
+.dt .cap{caption-side:top;text-align:left;font-size:12px;color:var(--muted-foreground);padding-bottom:8px}
+.note{margin-top:10px;color:var(--muted-foreground)}
+.verdict{margin-top:12px;font-size:13px;font-weight:600;line-height:1.4}
+
+/* WAPE-oversikt (festet nederst fra 1024 px) */
+.wape-overview{margin-top:16px;min-height:36px;padding:9px 16px;background:var(--surface-subtle);border-top:1px solid var(--border);font-size:13px;line-height:1.4}
+
+/* Lastetilstand: hvitt slør 80 %, boks med 1 px kant, ingen skygge */
+.veil{position:absolute;inset:0;background:rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center}
+.loadbox{display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:16px 20px;background:var(--background);border:1px solid var(--border);border-radius:var(--r-md);font-size:14px}
+.spinner{flex:none;width:20px;height:20px;border-radius:9999px;border:2px solid var(--gridline);border-top-color:var(--primary);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+
+</style>
+</head>
+<body>
+<p class="mock-caption">Dashbord, godkjent tilstand etter opplasting av salg_2026-10.csv. P-109 (ETS taper) står øverst og er valgt automatisk; «Vis detaljer per opprinnelse (6)» er åpnet. Søkefeltet vises med fokusring for å illustrere fokusstilen. 1280 px.</p>
+<div class="browser">
+  <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">localhost:3000</span></div>
+  <div class="viewport"><div class="app">
+  <a class="skip" href="#produktliste">Hopp til produktlisten</a>
+  <header class="topbar">
+  <div class="tb-left">
+    <span class="wordmark">PROGNOS</span>
+    <div class="field-inline">
+      <span class="label" id="ds-label">Datasett</span>
+      <button class="select" type="button" role="combobox" aria-labelledby="ds-label" aria-expanded="false"><span class="num">salg_2026-10.csv · 13.11.2026 kl. 09.42</span><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="btn-primary" type="button" aria-describedby="csv-krav">Last opp CSV</button>
+    <p id="csv-krav" class="caption muted">CSV med kolonnene produkt_id, maaned, antall</p>
+  </div>
+</header>
+  <main class="main">
+    <h1 class="sr-only">PROGNOS – dashbord</h1>
+    <section class="report report-approved" aria-labelledby="rap-h">
+  <h2 class="report-h" id="rap-h" tabindex="-1"><span aria-hidden="true">✓</span> 200 produkter godkjent · 3 flagget (kort historikk)</h2>
+  <p class="report-dist">Fordeling: ingen 1 · sesongnaiv 2 · ets 197</p>
+  <button class="btn-link" type="button" aria-expanded="false" aria-controls="advarsler">Vis advarsler (2)</button>
+</section>
+    <div class="grid">
+      <div class="col-left"><nav class="panel plist" aria-label="Produkter" id="produktliste" tabindex="-1">
+  <div class="panel-header"><h2 class="ph">Produkter</h2></div>
+  <div class="search">
+    <label class="label" for="sok">Søk produkt-ID</label>
+    <!-- Fokusring-illustrasjon: søkefeltet vises som om det har tastaturfokus (2 px #1F5FAD, 2 px hvit offset). -->
+    <input id="sok" class="input focus-demo" type="search" autocomplete="off">
+    <p class="caption muted" aria-live="polite">Viser 200 av 200</p>
+  </div>
+  <div class="plist-head caption muted" aria-hidden="true"><span>Produkt</span><span>WAPE</span></div>
+  <ul class="plist-rows" role="listbox" aria-label="Produkter, svakeste først"><li role="option" aria-selected="true" aria-label="P-109, WAPE 24,0 %, flagg: ETS taper" tabindex="0" class="prow sel">
+        <div class="prow-1"><span class="pid">P-109</span><span class="num"><span class="sr-only">WAPE </span>24,0 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-162, WAPE 22,6 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-162</span><span class="num"><span class="sr-only">WAPE </span>22,6 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-045, WAPE 20,3 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-045</span><span class="num"><span class="sr-only">WAPE </span>20,3 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-187, WAPE 19,4 %, flagg: kort historikk" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-187</span><span class="num"><span class="sr-only">WAPE </span>19,4 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>kort historikk</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-071, WAPE 17,8 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-071</span><span class="num"><span class="sr-only">WAPE </span>17,8 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-128, WAPE 15,2 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-128</span><span class="num"><span class="sr-only">WAPE </span>15,2 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-013, WAPE 13,9 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-013</span><span class="num"><span class="sr-only">WAPE </span>13,9 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-033, WAPE 12,6 %, flagg: kort historikk" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-033</span><span class="num"><span class="sr-only">WAPE </span>12,6 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>kort historikk</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-196, WAPE 11,7 %, flagg: ETS taper" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-196</span><span class="num"><span class="sr-only">WAPE </span>11,7 %</span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>ETS taper</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-200, WAPE udefinert, flagg: kort historikk" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-200</span><span class="num"><span class="sr-only">WAPE </span><span aria-hidden="true">–</span><span class="sr-only">udefinert</span></span></div>
+        <div class="prow-2"><span class="flag"><svg class="ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>kort historikk</span></div>
+      </li><li role="option" aria-selected="false" aria-label="P-151, WAPE udefinert" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-151</span><span class="num"><span class="sr-only">WAPE </span><span aria-hidden="true">–</span><span class="sr-only">udefinert</span></span></div>
+        
+      </li><li role="option" aria-selected="false" aria-label="P-024, WAPE 21,7 %" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-024</span><span class="num"><span class="sr-only">WAPE </span>21,7 %</span></div>
+        
+      </li><li role="option" aria-selected="false" aria-label="P-117, WAPE 20,9 %" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-117</span><span class="num"><span class="sr-only">WAPE </span>20,9 %</span></div>
+        
+      </li><li role="option" aria-selected="false" aria-label="P-090, WAPE 20,1 %" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-090</span><span class="num"><span class="sr-only">WAPE </span>20,1 %</span></div>
+        
+      </li><li role="option" aria-selected="false" aria-label="P-142, WAPE 19,6 %" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-142</span><span class="num"><span class="sr-only">WAPE </span>19,6 %</span></div>
+        
+      </li><li role="option" aria-selected="false" aria-label="P-058, WAPE 19,2 %" tabindex="-1" class="prow">
+        <div class="prow-1"><span class="pid">P-058</span><span class="num"><span class="sr-only">WAPE </span>19,2 %</span></div>
+        
+      </li></ul>
+</nav></div>
+      <div class="col-main">
+        <section class="panel" aria-labelledby="gr-h">
+  <div class="panel-header"><h2 class="ph" id="gr-h">Prognose – P-109</h2><p class="caption muted">ETS · 6 måneder fram</p></div>
+  <div class="panel-body">
+    <div class="chart-wrap"><svg class="chart" width="896" height="360" viewBox="0 0 896 360" role="img" aria-label="Prognose for P-109: historikk fra jan. 2023 til okt. 2026, Forventet 960 over 6 måneder, spenn 820–1 110."><line x1="48" x2="880" y1="330" y2="330" stroke="#D9DCE0" stroke-width="1"/><text x="40" y="334" text-anchor="end" class="ax">0</text><line x1="48" x2="880" y1="269.6" y2="269.6" stroke="#ECEEF0" stroke-width="1"/><text x="40" y="273.6" text-anchor="end" class="ax">50</text><line x1="48" x2="880" y1="209.2" y2="209.2" stroke="#ECEEF0" stroke-width="1"/><text x="40" y="213.2" text-anchor="end" class="ax">100</text><line x1="48" x2="880" y1="148.8" y2="148.8" stroke="#ECEEF0" stroke-width="1"/><text x="40" y="152.8" text-anchor="end" class="ax">150</text><line x1="48" x2="880" y1="88.4" y2="88.4" stroke="#ECEEF0" stroke-width="1"/><text x="40" y="92.4" text-anchor="end" class="ax">200</text><line x1="48" x2="880" y1="28" y2="28" stroke="#ECEEF0" stroke-width="1"/><text x="40" y="32" text-anchor="end" class="ax">250</text><polygon points="782.1,129.5 798.4,122.2 814.7,127.1 831.1,92.0 847.4,113.8 863.7,106.5 880.0,77.5 880.0,144.0 863.7,165.7 847.4,170.5 831.1,154.8 814.7,181.4 798.4,173.0 782.1,129.5" fill="#C9DAF0" stroke="none"/><polyline points="782.1,129.5 798.4,122.2 814.7,127.1 831.1,92.0 847.4,113.8 863.7,106.5 880.0,77.5" fill="none" stroke="#4A74B5" stroke-width="1"/><polyline points="782.1,129.5 798.4,173.0 814.7,181.4 831.1,154.8 847.4,170.5 863.7,165.7 880.0,144.0" fill="none" stroke="#4A74B5" stroke-width="1"/><line x1="798.4313725490196" x2="798.4313725490196" y1="16" y2="330" stroke="#6B7480" stroke-width="1"/><text x="804.4313725490196" y="24" class="ax">Prognose →</text><polyline points="48.0,185.0 64.3,187.5 80.6,166.9 96.9,160.9 113.3,151.2 129.6,146.4 145.9,136.7 162.2,163.3 178.5,158.5 194.8,148.8 211.1,166.9 227.5,146.4 243.8,177.8 260.1,182.6 276.4,160.9 292.7,153.6 309.0,148.8 325.3,139.1 341.6,124.6 358.0,117.4 374.3,160.9 390.6,146.4 406.9,151.2 423.2,130.7 439.5,170.5 455.8,175.4 472.2,148.8 488.5,139.1 504.8,141.6 521.1,131.9 537.4,83.6 553.7,175.4 570.0,153.6 586.4,88.4 602.7,142.8 619.0,122.2 635.3,163.3 651.6,173.0 667.9,139.1 684.2,129.5 700.5,115.0 716.9,110.1 733.2,156.0 749.5,139.1 765.8,122.2 782.1,129.5" fill="none" stroke="#3D4450" stroke-width="2" stroke-linejoin="round"/><polyline points="782.1,129.5 798.4,148.8 814.7,154.8 831.1,124.6 847.4,142.8 863.7,136.7 880.0,112.6" fill="none" stroke="#1F5FAD" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round"/><line x1="48" x2="48" y1="330" y2="335" stroke="#D9DCE0"/><text x="48" y="348" text-anchor="middle" class="ax">jan. 2023</text><line x1="64.31372549019608" x2="64.31372549019608" y1="330" y2="333" stroke="#D9DCE0"/><line x1="80.62745098039215" x2="80.62745098039215" y1="330" y2="333" stroke="#D9DCE0"/><line x1="96.94117647058823" x2="96.94117647058823" y1="330" y2="333" stroke="#D9DCE0"/><line x1="113.25490196078431" x2="113.25490196078431" y1="330" y2="333" stroke="#D9DCE0"/><line x1="129.5686274509804" x2="129.5686274509804" y1="330" y2="333" stroke="#D9DCE0"/><line x1="145.88235294117646" x2="145.88235294117646" y1="330" y2="335" stroke="#D9DCE0"/><text x="145.88235294117646" y="348" text-anchor="middle" class="ax">jul. 2023</text><line x1="162.19607843137254" x2="162.19607843137254" y1="330" y2="333" stroke="#D9DCE0"/><line x1="178.50980392156862" x2="178.50980392156862" y1="330" y2="333" stroke="#D9DCE0"/><line x1="194.8235294117647" x2="194.8235294117647" y1="330" y2="333" stroke="#D9DCE0"/><line x1="211.13725490196077" x2="211.13725490196077" y1="330" y2="333" stroke="#D9DCE0"/><line x1="227.45098039215685" x2="227.45098039215685" y1="330" y2="333" stroke="#D9DCE0"/><line x1="243.76470588235293" x2="243.76470588235293" y1="330" y2="335" stroke="#D9DCE0"/><text x="243.76470588235293" y="348" text-anchor="middle" class="ax">jan. 2024</text><line x1="260.07843137254906" x2="260.07843137254906" y1="330" y2="333" stroke="#D9DCE0"/><line x1="276.3921568627451" x2="276.3921568627451" y1="330" y2="333" stroke="#D9DCE0"/><line x1="292.7058823529412" x2="292.7058823529412" y1="330" y2="333" stroke="#D9DCE0"/><line x1="309.01960784313724" x2="309.01960784313724" y1="330" y2="333" stroke="#D9DCE0"/><line x1="325.3333333333333" x2="325.3333333333333" y1="330" y2="333" stroke="#D9DCE0"/><line x1="341.6470588235294" x2="341.6470588235294" y1="330" y2="335" stroke="#D9DCE0"/><text x="341.6470588235294" y="348" text-anchor="middle" class="ax">jul. 2024</text><line x1="357.96078431372547" x2="357.96078431372547" y1="330" y2="333" stroke="#D9DCE0"/><line x1="374.27450980392155" x2="374.27450980392155" y1="330" y2="333" stroke="#D9DCE0"/><line x1="390.5882352941176" x2="390.5882352941176" y1="330" y2="333" stroke="#D9DCE0"/><line x1="406.9019607843137" x2="406.9019607843137" y1="330" y2="333" stroke="#D9DCE0"/><line x1="423.2156862745098" x2="423.2156862745098" y1="330" y2="333" stroke="#D9DCE0"/><line x1="439.52941176470586" x2="439.52941176470586" y1="330" y2="335" stroke="#D9DCE0"/><text x="439.52941176470586" y="348" text-anchor="middle" class="ax">jan. 2025</text><line x1="455.84313725490193" x2="455.84313725490193" y1="330" y2="333" stroke="#D9DCE0"/><line x1="472.15686274509807" x2="472.15686274509807" y1="330" y2="333" stroke="#D9DCE0"/><line x1="488.47058823529414" x2="488.47058823529414" y1="330" y2="333" stroke="#D9DCE0"/><line x1="504.7843137254902" x2="504.7843137254902" y1="330" y2="333" stroke="#D9DCE0"/><line x1="521.0980392156863" x2="521.0980392156863" y1="330" y2="333" stroke="#D9DCE0"/><line x1="537.4117647058824" x2="537.4117647058824" y1="330" y2="335" stroke="#D9DCE0"/><text x="537.4117647058824" y="348" text-anchor="middle" class="ax">jul. 2025</text><line x1="553.7254901960785" x2="553.7254901960785" y1="330" y2="333" stroke="#D9DCE0"/><line x1="570.0392156862745" x2="570.0392156862745" y1="330" y2="333" stroke="#D9DCE0"/><line x1="586.3529411764706" x2="586.3529411764706" y1="330" y2="333" stroke="#D9DCE0"/><line x1="602.6666666666666" x2="602.6666666666666" y1="330" y2="333" stroke="#D9DCE0"/><line x1="618.9803921568628" x2="618.9803921568628" y1="330" y2="333" stroke="#D9DCE0"/><line x1="635.2941176470588" x2="635.2941176470588" y1="330" y2="335" stroke="#D9DCE0"/><text x="635.2941176470588" y="348" text-anchor="middle" class="ax">jan. 2026</text><line x1="651.6078431372549" x2="651.6078431372549" y1="330" y2="333" stroke="#D9DCE0"/><line x1="667.9215686274509" x2="667.9215686274509" y1="330" y2="333" stroke="#D9DCE0"/><line x1="684.2352941176471" x2="684.2352941176471" y1="330" y2="333" stroke="#D9DCE0"/><line x1="700.5490196078431" x2="700.5490196078431" y1="330" y2="333" stroke="#D9DCE0"/><line x1="716.8627450980392" x2="716.8627450980392" y1="330" y2="333" stroke="#D9DCE0"/><line x1="733.1764705882352" x2="733.1764705882352" y1="330" y2="335" stroke="#D9DCE0"/><text x="733.1764705882352" y="348" text-anchor="middle" class="ax">jul. 2026</text><line x1="749.4901960784314" x2="749.4901960784314" y1="330" y2="333" stroke="#D9DCE0"/><line x1="765.8039215686274" x2="765.8039215686274" y1="330" y2="333" stroke="#D9DCE0"/><line x1="782.1176470588235" x2="782.1176470588235" y1="330" y2="333" stroke="#D9DCE0"/><line x1="798.4313725490196" x2="798.4313725490196" y1="330" y2="333" stroke="#D9DCE0"/><line x1="814.7450980392157" x2="814.7450980392157" y1="330" y2="333" stroke="#D9DCE0"/><line x1="831.0588235294117" x2="831.0588235294117" y1="330" y2="335" stroke="#D9DCE0"/><text x="831.0588235294117" y="348" text-anchor="middle" class="ax">jan. 2027</text><line x1="847.3725490196078" x2="847.3725490196078" y1="330" y2="333" stroke="#D9DCE0"/><line x1="863.6862745098039" x2="863.6862745098039" y1="330" y2="333" stroke="#D9DCE0"/><line x1="880" x2="880" y1="330" y2="333" stroke="#D9DCE0"/></svg></div>
+    <div class="legend" aria-hidden="true">
+  <span class="lg"><svg width="24" height="10"><line x1="0" x2="24" y1="5" y2="5" stroke="#3D4450" stroke-width="2"/></svg>Historikk</span>
+  <span class="lg"><svg width="24" height="10"><line x1="0" x2="24" y1="5" y2="5" stroke="#1F5FAD" stroke-width="2" stroke-dasharray="6 4"/></svg>Forventet (P50)</span>
+  <span class="lg"><svg width="18" height="12"><rect x="0" y="1" width="18" height="10" fill="#C9DAF0"/><line x1="0" x2="18" y1="1.5" y2="1.5" stroke="#4A74B5" stroke-width="1"/><line x1="0" x2="18" y1="10.5" y2="10.5" stroke="#4A74B5" stroke-width="1"/></svg>Spenn Pessimistisk–Optimistisk (P10–P90)</span>
+</div>
+    <button class="btn-link" type="button" aria-expanded="false" aria-controls="historikk"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>Vis historikk som tabell</button>
+  </div>
+</section>
+        <div class="tables">
+          <section class="panel" aria-labelledby="sc-h">
+  <div class="panel-header"><h2 class="ph" id="sc-h">Scenarioer</h2></div>
+  <div class="panel-body">
+    <table class="dt" aria-describedby="fr12">
+      <caption class="sr-only">Scenarioer for P-109 per måned, med sum</caption>
+      <thead><tr>
+        <th scope="col" class="tl">Måned</th>
+        <th scope="col">Pessimistisk<span class="sub">P10</span></th>
+        <th scope="col">Forventet<span class="sub">P50</span></th>
+        <th scope="col">Optimistisk<span class="sub">P90</span></th>
+      </tr></thead>
+      <tbody><tr><th scope="row">nov. 2026</th><td>130</td><td>150</td><td>172</td></tr><tr><th scope="row">des. 2026</th><td>123</td><td>145</td><td>168</td></tr><tr><th scope="row">jan. 2027</th><td>145</td><td>170</td><td>197</td></tr><tr><th scope="row">feb. 2027</th><td>132</td><td>155</td><td>179</td></tr><tr><th scope="row">mar. 2027</th><td>136</td><td>160</td><td>185</td></tr><tr><th scope="row">apr. 2027</th><td>154</td><td>180</td><td>209</td></tr></tbody>
+      <tfoot><tr><th scope="row">Sum</th><td>820</td><td>960</td><td>1 110</td></tr></tfoot>
+    </table>
+    <p class="caption note" id="fr12">Totalene er summer av månedlige verdier. Det reelle spennet mellom Pessimistisk og Optimistisk er smalere enn det som vises.</p>
+  </div>
+</section>
+          <section class="panel" aria-labelledby="bt-h">
+  <div class="panel-header"><h2 class="ph" id="bt-h">Backtest (siste 6 måneder)</h2></div>
+  <div class="panel-body">
+    <table class="dt">
+      <caption class="sr-only">Backtest for P-109, siste 6 måneder: sesongnaiv baseline og ETS</caption>
+      <thead><tr><th scope="col" class="tl"><span class="sr-only">Mål</span></th><th scope="col">Sesongnaiv baseline</th><th scope="col">ETS</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">WAPE</th><td>19,0 %</td><td>24,0 %</td></tr>
+        <tr><th scope="row">Intervalldekning</th><td>83 %</td><td>67 %</td></tr>
+      </tbody>
+    </table>
+    <p class="verdict">ETS taper mot baseline</p>
+    <button class="btn-link" type="button" aria-expanded="true" aria-controls="detaljer"><svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>Skjul detaljer per opprinnelse</button>
+  </div>
+</section>
+        </div>
+        <section class="panel" id="detaljer">
+  <div class="panel-body">
+    <table class="dt detail">
+      <caption class="cap">Detaljer per opprinnelse – P-109. Avvik = |faktisk − P50|. WAPE = Σ avvik / Σ faktisk.</caption>
+      <thead><tr>
+        <th scope="col" class="tl">Måned</th><th scope="col">Faktisk</th>
+        <th scope="col" class="g">Baseline P50</th><th scope="col">Baseline avvik</th><th scope="col" class="tl">Baseline i spenn</th>
+        <th scope="col" class="g">ETS P50</th><th scope="col">ETS avvik</th><th scope="col" class="tl">ETS i spenn</th>
+      </tr></thead>
+      <tbody><tr><th scope="row">mai 2026</th><td>178</td>
+      <td class="g">156</td><td>22</td><td class="tl">ja</td>
+      <td class="g">208</td><td>30</td><td class="tl">ja</td></tr><tr><th scope="row">jun. 2026</th><td>182</td>
+      <td class="g">164</td><td>18</td><td class="tl">ja</td>
+      <td class="g">170</td><td>12</td><td class="tl">ja</td></tr><tr><th scope="row">jul. 2026</th><td>144</td>
+      <td class="g">204</td><td>60</td><td class="tl">nei</td>
+      <td class="g">214</td><td>70</td><td class="tl">nei</td></tr><tr><th scope="row">aug. 2026</th><td>158</td>
+      <td class="g">128</td><td>30</td><td class="tl">ja</td>
+      <td class="g">210</td><td>52</td><td class="tl">ja</td></tr><tr><th scope="row">sep. 2026</th><td>172</td>
+      <td class="g">146</td><td>26</td><td class="tl">ja</td>
+      <td class="g">152</td><td>20</td><td class="tl">ja</td></tr><tr><th scope="row">okt. 2026</th><td>166</td>
+      <td class="g">200</td><td>34</td><td class="tl">ja</td>
+      <td class="g">222</td><td>56</td><td class="tl">nei</td></tr></tbody>
+      <tfoot><tr><th scope="row">Sum</th><td>1 000</td><td class="g"></td><td>190</td><td></td><td class="g"></td><td>240</td><td></td></tr></tfoot>
+    </table>
+  </div>
+</section>
+      </div>
+    </div>
+  </main>
+  <footer class="wape-overview num">Total WAPE: Sesongnaiv baseline 21,3 % · ETS 18,1 % · ETS slår baseline for 162 av 180 produkter</footer>
+</div></div>
+</div>
+</body>
+</html>

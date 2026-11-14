@@ -54,3 +54,47 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
 
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md](../.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md)
+
+## 2026-11-14 — UX-spesifikasjon for dashbordet
+
+**Økt:** Laget UX-spesifikasjon med `/bmad-ux` (Claude Code) i rask modus, basert på `prd.md` og `addendum.md`. Primærbruker er Kari, og reisene er UJ-1 til UJ-4. Resultatet er `DESIGN.md` (utseende), `EXPERIENCE.md` (atferd) og to HTML-mockups.
+
+**Hva KI-en gjorde:**
+- Trakk ut det UX-relevante fra PRD og addendum med en subagent, og pekte på hull PRD-en ikke dekker: form-faktor, lastetilstand, søk, tilgjengelighet og visuell retning.
+- Skrev utkast til `DESIGN.md` og `EXPERIENCE.md` med 19 `[ASSUMPTION]`-merker, som jeg gikk gjennom.
+- Kjørte to gjennomganger som subagenter: en rubrikk-gjennomgang (adequate; 0 kritiske, 3 høye, 15 middels, 23 lave) og en tilgjengelighetsgjennomgang mot WCAG 2.1 AA (godkjent med endringer; 0 kritiske, 5 høye, 9 middels, 8 lave). Funnene ble samlet i en valideringsrapport med 63 funn etter sammenslåing (0/7/21/35).
+- De 7 høye funnene var:
+  - dommerlinjen i backtest-tabellen håndterte ikke lik WAPE
+  - inndatakanter med kontrast 1,38:1
+  - for svak fokusring fra shadcn
+  - ingen modell for høyde og scrolling
+  - grafen var både bilde og fokuserbar
+  - fokus forsvant etter lastetilstanden
+  - reflow var bare dekket for 200 % zoom
+- Rendret to mockups (dashbordet med P-109 valgt, og avvist fil med lastetilstand). Arbeidet med dem avdekket blant annet et eksempel med feil tall: fordelingen per historikknivå stemte ikke med antall flaggede.
+- Tok inn alle høye og middels funn, oppdaterte mockupene og kontrollerte tallene i dem med skript. Kjørte til slutt en språkgjennomgang av struktur og prosa.
+
+**Valg jeg tok:**
+- Form-faktor: desktop og laptop, ned til 1280 px bredde. Ikke nettbrett eller mobil i v1.
+- Lastetilstand: en enkel spinner med tekst, og resten av siden deaktivert. Ikke trinnvis fremdrift, fordi det krever ekstra backend-logikk.
+- Søk: et enkelt søkefelt som filtrerer produktlisten på `produkt_id`, med sorteringen beholdt. Dette er et tillegg utover PRD-en, og jeg legger det inn som nytt FR.
+- Tilgjengelighet: WCAG 2.1 AA (kontrast, tastatur, etiketter, flagg med ikon og tekst). Ingen mørk modus i v1.
+- Visuell retning: nøktern og Excel-nær, nøytrale grå nyanser og én blå aksentfarge, høyrejusterte tall med faste sifferbredder og norsk tallformat.
+- Grafen er et bilde som ikke kan fokuseres. Under den ligger «Vis historikk som tabell» som tekstalternativ.
+- Hele siden scroller, og produktlisten er sticky. Valideringsrapporten er foldet sammen til oppsummeringslinjen.
+- Lasteteksten er alltid den generelle: «Kjører validering og prognose – dette kan ta opptil ett minutt».
+- De lave funnene fra gjennomgangene ble bevisst ikke tatt inn. Jeg ba bare om de høye og middels. Noen få lave ble likevel rettet underveis.
+
+**Forslag fra KI-en som jeg endret eller presiserte:**
+- Antakelse 2: KI-en foreslo at ingen produkter skulle være valgt etter innlasting, slik UJ-1 beskriver. Jeg endret det til at første rad i produktlisten velges automatisk. UJ-1 i PRD-en må oppdateres.
+- Antakelse 3: KI-en foreslo WAPE i hele prosent, som i PRD-eksemplene. Jeg endret det til én desimal (for eksempel 7,4 %).
+- Jeg ønsket opprinnelig at lasteteksten skulle vise antall produkter. Gjennomgangen viste at frontend ikke kjenner antallet før svaret kommer, fordi alt sendes i én forespørsel (FR-7). Jeg valgte derfor den generelle teksten.
+- KI-en anbefalte løsningene for graf og scrolling. Jeg valgte de anbefalte alternativene.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/994-2026-11-14-21-07-06-ux-spesifikasjon.md](../.logs/mathias-ellingsen/994-2026-11-14-21-07-06-ux-spesifikasjon.md)
+- UX-filene ligger i [_bmad-output/planning-artifacts/ux-designs/ux-G96-ellingsen-2026-11-14/](../_bmad-output/planning-artifacts/ux-designs/ux-G96-ellingsen-2026-11-14/):
+  - `DESIGN.md` og `EXPERIENCE.md`
+  - `mockups/key-dashbord.html` og `mockups/key-avvist.html`
+  - `review-rubric.md`, `review-tilgjengelighet.md` og `validation-report.md`/`.html`
+  - `.memlog.md`
