@@ -43,3 +43,24 @@ Samkjøre briefen med Bårds `technology.md`: v1 skal bruke FastAPI, Next.js og 
 
 ### Åpne punkter
 - Den nye stacken gir mer arbeid i v1 enn Streamlit-løsningen (to språk, database, migrasjoner, Docker). Gruppen bør vurdere om v1 fortsatt rekkes i semesteret.
+
+## 2026-11-14 kl. 18:32 — Mathias Ellingsen
+
+### Oppgave
+Fire endringer i `PRODUCT_BRIEF.md`: bytte til SQLite, slik at sensor ikke trenger Docker og F11/F12 blir enkle; legge til «Hva skiller PROGNOS fra andre verktøy»; korte ned avsnitt 5 ved å flytte komponenttabell, API og datamodell til arkitekturdokumentet (steg 4); legge til en skisse av dashbordet.
+
+### Plan
+- Arkitekturdokumentet fra steg 4 finnes ikke ennå. Det flyttede innholdet legges derfor i et utkast, `.docs/planning-artifacts/architecture/arkitektur-utkast.md`, oppdatert til SQLite.
+- Redigere briefen direkte.
+
+### Resultat
+- `PRODUCT_BRIEF.md`:
+  - Nytt underavsnitt «Hva skiller PROGNOS fra andre verktøy» sist i avsnitt 2. Det sier at det finnes ERP-prognosemoduler og egne planleggingsverktøy, og at PROGNOS er en studentprototype som viser et prinsipp for bedrifter som bruker regneark: usikkerhet og etterprøving.
+  - 4.1: datasett lagres i SQLite. Under «5. Dashbord» er det lagt inn en tekstskisse som viser plasseringen av opplasting/datasettvelger og validering (øverst), produktvelger (venstre), graf (midten), scenariotabell og backtest (under grafen) og WAPE-oversikt (nederst).
+  - Avsnitt 5: en kort innledning som begrunner SQLite i stedet for PostgreSQL fra `technology.md`, arkitekturskissen med SQLite, og prinsippene (null konfigurasjon nå også uten Docker). Tabellene for komponenter, API og datamodell og listen «med / ikke med» er fjernet.
+  - F11 gjelder nå SQLite. F12 krever at appen starter med README-kommandoene uten Docker eller nøkler, at databasefila opprettes automatisk, og at `/api/health` svarer OK.
+- Ny fil `.docs/planning-artifacts/architecture/arkitektur-utkast.md` med komponenttabell (SQLite + `aiosqlite`), API, datamodell og med/ikke med/avvik fra `technology.md`.
+- Endringene er ikke committet.
+
+### Åpne punkter
+- Innholdet i `arkitektur-utkast.md` skal inn i arkitekturdokumentet i steg 4. Der må vi også velge mellom Alembic og `create_all` for SQLite.
