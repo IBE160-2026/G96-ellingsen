@@ -44,8 +44,8 @@ Kari er etterspørselsplanlegger i en produksjonsbedrift med ca. 100 ansatte og 
 **Hennes arbeidsflyt i v1:**
 
 1. Eksporterer månedlig salg per produkt fra ERP til CSV.
-2. Laster opp filen i PROGNOS og ser valideringsresultatet.
-3. Velger et produkt i dashbordet og ser historikk, prognose for 6 måneder, intervall og de tre scenarioene.
+2. Laster opp filen i PROGNOS og ser valideringsresultatet. Når filen er godkjent, lages prognosen automatisk.
+3. Ser produktlisten, der de svakeste prognosene ligger øverst, og velger et produkt og ser historikk, prognose for 6 måneder, intervall og de tre scenarioene.
 4. Sjekker backtesten: treffer modellen bedre enn sesongnaiv baseline for dette produktet?
 
 Andre roller, som materialplanlegger, innkjøp, salg, marked og ledelse, kan ha nytte av prognosen, men PROGNOS er ikke laget for dem i v1.
@@ -93,14 +93,26 @@ v1 består av fem deler. Alt som ikke står her, er utenfor v1.
 **1. CSV-import med enkel validering**
 - Opplasting av én CSV-fil med kolonnene `produkt_id`, `maaned` (ÅÅÅÅ-MM) og `antall` fra dashbordet til backend.
 - Godkjente datasett lagres i en lokal SQLite-database, slik at planleggeren kan åpne dem igjen senere.
-- Tydelige feilmeldinger ved manglende kolonner, ugyldige datoer og negative eller ikke-numeriske verdier.
-- Produkter med under 24 måneders historikk blir flagget og får bare baseline-prognose.
+- Komma eller semikolon som skilletegn gjenkjennes automatisk (norsk Excel bruker ofte semikolon).
+- `antall` må være et heltall ≥ 0.
+- Tydelige feilmeldinger ved manglende kolonner, ugyldige datoer, negative verdier eller verdier som ikke er heltall, og duplikater (samme produkt og måned).
+- Manglende måneder fylles med 0 og gir en advarsel i valideringsrapporten.
+- Hvor lang historikk et produkt har, avgjør hva det får:
+
+  | Historikk | Prognose |
+  |---|---|
+  | Under 12 måneder | Ingen prognose. Produktet flagges. |
+  | 12–23 måneder | Bare sesongnaiv. Produktet flagges. |
+  | 24 måneder eller mer | ETS og sesongnaiv baseline. |
+
+- Prognosen kjøres automatisk når filen er godkjent.
 
 **2. Én modell mot baseline**
 - Månedlig prognose per produkt, 6 måneder frem (fast horisont).
 - Modell: **ETS** (`AutoETS` fra `statsforecast`), som gir både punktestimat og prediksjonsintervaller.
 - Baseline: **sesongnaiv** (samme måned i fjor).
-- Output per produkt og måned: **P10, P50 og P90**.
+- Output per produkt og måned: **P10, P50 og P90**. P10 og P90 er grensene i et 80 % prediksjonsintervall (`level=[80]` i `statsforecast`).
+- Salg kan ikke være negativt, så alle verdier settes til minst 0.
 
 **3. Tre scenarioer**
 
@@ -110,15 +122,20 @@ v1 består av fem deler. Alt som ikke står her, er utenfor v1.
 | **Forventet** | P50 |
 | **Optimistisk** | P90 |
 
-Totalt volum for de 6 månedene vises for hvert scenario.
+Totalt volum for de 6 månedene vises for hvert scenario, regnet som summen av de månedlige verdiene. Grensesnittet har en merknad om at spennet mellom pessimistisk og optimistisk total da blir bredere enn det reelle. Det er enkelt å regne etter, og simulering ville vært for komplisert for v1.
+
+I grensesnittet er Pessimistisk, Forventet og Optimistisk hovedordene, og P10, P50 og P90 står som forklaring. Planleggere forstår scenarioer bedre enn kvantiler.
 
 **4. Backtest**
-- Rullerende backtest over de siste 6 månedene av historikken (opprinnelse flyttes én måned om gangen).
+- Rullerende backtest med 6 opprinnelser over de siste 6 månedene av historikken. Hver opprinnelse prognoserer 1 måned frem, og opprinnelsen flyttes én måned om gangen.
 - **WAPE** for ETS og sesongnaiv baseline, per produkt og totalt.
 - Intervalldekning: andel faktiske verdier innenfor P10–P90.
+- ETS trenger 24 måneders trening ved hver opprinnelse. Produkter med under 30 måneders historikk får derfor bare baseline-backtest, selv om de får ETS-prognose.
+- Hvis ETS taper mot baseline for et produkt, vises ETS-prognosen likevel. Produktet flagges, og begge WAPE-tallene vises.
 
 **5. Dashbord**
 - Next.js-app med opplasting, datasettvelger og produktvelger.
+- Dashbordet starter med produktlisten sortert etter WAPE, med de svakeste prognosene øverst. Produkter med kort historikk og produkter der ETS taper mot baseline er flagget.
 - Graf per produkt (Recharts): historikk, prognose (P50) og intervall (P10–P90) som skyggelagt bånd.
 - Tabell med scenarioer og backtest-resultat for valgt produkt, og en WAPE-oversikt for alle produkter.
 
@@ -127,39 +144,40 @@ Skisse av dashbordet (én side):
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │ PROGNOS     Datasett: [salg_2026-10.csv ▾]          [ Last opp CSV ] │
-│             ✓ 20 produkter godkjent · 1 flagget (kort historikk)     │
+│             ✓ 20 produkter godkjent · 2 flagget (kort historikk)     │
 ├────────────────────┬─────────────────────────────────────────────────┤
 │ PRODUKTER          │ GRAF: P-104 Ventilhus                           │
-│ Søk: [________]    │                                                 │
+│ (svakeste øverst)  │                                                 │
 │                    │ antall                                          │
-│   P-101  WAPE 12 % │   │       historikk          prognose           │
-│   P-102  WAPE  9 % │   │  /\    /\    /\       ░░▒▒▒▒▒░░ ← P10–P90   │
+│   P-109 ⚠ ETS taper│   │       historikk          prognose           │
+│   P-117 ⚠ kort     │   │  /\    /\    /\       ░░▒▒▒▒▒░░ ← P10–P90   │
 │ ● P-104  WAPE 14 % │   │ /  \__/  \__/  \____▒▒───────▒▒ ← P50       │
-│   P-117  ⚠ kort    │   │                       ░░▒▒▒▒▒░░             │
-│   ...              │   └───────────────────────┼──────────── måned   │
-│                    │                         i dag                   │
+│   P-101  WAPE 12 % │   │                       ░░▒▒▒▒▒░░             │
+│   P-102  WAPE  9 % │   └───────────────────────┼──────────── måned   │
+│   ...              │                         i dag                   │
 │                    ├────────────────────────┬────────────────────────┤
 │                    │ SCENARIOER (6 mnd)     │ BACKTEST (siste 6 mnd) │
 │                    │ Pessimistisk (P10)  820│ WAPE ETS          14 % │
 │                    │ Forventet    (P50)  960│ WAPE sesongnaiv   21 % │
 │                    │ Optimistisk  (P90) 1110│ ETS slår baseline   ✓  │
-│                    │                        │ Dekning P10–P90   80 % │
+│                    │ * spennet er for bredt │ Dekning P10–P90   80 % │
 ├────────────────────┴────────────────────────┴────────────────────────┤
 │ WAPE-OVERSIKT, ALLE PRODUKTER:  ETS 13 % · sesongnaiv 19 % · 17/20 ✓ │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Øverst:** datasettvelger og knapp for opplasting. Valideringsresultatet vises rett under, med feilmeldinger hvis filen blir avvist.
-- **Venstre:** produktvelger med WAPE per produkt. Produkter med kort historikk er merket.
+- **Venstre:** produktvelger sortert etter WAPE, med de svakeste øverst. Produkter med kort historikk og produkter der ETS taper er flagget.
 - **Midten:** graf for valgt produkt med historikk, P50 og P10–P90 som skyggelagt bånd.
-- **Under grafen:** scenariotabell til venstre og backtest til høyre.
+- **Under grafen:** scenariotabell til venstre, med merknaden om spennet, og backtest til høyre.
 - **Nederst:** WAPE-oversikt for alle produkter, ETS mot baseline.
 
 Tallene i skissen er bare eksempler.
 
 **Syntetiske testdata (støtte for v1)**
 - Et skript genererer et datasett med **kjent trend, sesong og støy** (fast seed, så dataene blir like hver gang).
-- Ca. 20 produkter med 36 måneders historikk og ulike mønstre: sterk sesong, ren trend, flat serie med mye støy, og ett produkt med kort historikk.
+- Ca. 20 produkter med 36 måneders historikk. De fleste har trend i tillegg til sesong og støy, slik at ETS har noe å slå sesongnaiv på (F7). Noen har andre mønstre, som en flat serie med mye støy.
+- Ett produkt med under 12 måneders historikk og ett med 12–23 måneder, slik at alle tre historikknivåene blir testet.
 - Datasettet brukes i automatiske tester og i demo, og lastes inn i databasen ved oppstart hvis den er tom. Siden sesong og trend er kjent, kan vi sjekke at modellen fanger dem opp.
 
 ### 4.2 Trinn 2 — beslutningspunkt
@@ -207,7 +225,7 @@ På lang sikt kan PROGNOS bli en komplett modul for etterspørselsstyring som er
 
 ## 5. Teknisk tilnærming (v1)
 
-PROGNOS v1 er en enbrukerapp som kjører lokalt: backend i FastAPI, frontend i Next.js og en lokal **SQLite**-database. For backend og frontend følger vi stacken i [technology.md](.docs/planning-artifacts/architecture/technology.md). Den bruker PostgreSQL, men vi velger SQLite: en enbrukerapp trenger ingen egen databasetjeneste, og da trenger verken gruppen eller sensor Docker for å kjøre appen. Innlogging, betaling, e-post, Redis, proxy og deploy er ikke med i v1. Komponenter, API og datamodell beskrives i arkitekturdokumentet (steg 4). Utkastet ligger i [arkitektur-utkast.md](.docs/planning-artifacts/architecture/arkitektur-utkast.md).
+PROGNOS v1 er en enbrukerapp som kjører lokalt: backend i FastAPI, frontend i Next.js og en lokal **SQLite**-database. For backend og frontend følger vi stacken i [technology.md](.docs/planning-artifacts/architecture/technology.md). Den bruker PostgreSQL, men vi bruker SQLite etter anbefaling fra faglærer i tilbakemeldingen på briefen: en enbrukerapp trenger ingen egen databaseserver, og da trenger verken gruppen eller sensor Docker for å kjøre appen. Innlogging, betaling, e-post, Redis, proxy og deploy er ikke med i v1. Komponenter, API og datamodell beskrives i arkitekturdokumentet (steg 4). Utkastet ligger i [arkitektur-utkast.md](.docs/planning-artifacts/architecture/arkitektur-utkast.md).
 
 ### Arkitektur
 
@@ -229,6 +247,7 @@ Backend og frontend startes med én kommando hver, uten Docker. Databasefila opp
 - **Baseline først:** ETS måles alltid mot sesongnaiv. Hvis ETS ikke slår baseline for et produkt, vises det tydelig.
 - **Kjente data:** Utvikling og testing skjer på syntetiske data med kjent fasit.
 - **Etterprøvbart:** Scenarioer og beslutningsregler er enkle nok til at brukeren kan regne dem etter.
+- **Norsk:** Grensesnitt, PRD og dokumentasjon skrives på norsk, fordi brukeren og målgruppen er norsk.
 - **KI i utviklingen:** KI-assistenter brukes til koding, testgenerering og kodegjennomgang, og bruken dokumenteres.
 
 ---
@@ -242,8 +261,8 @@ Backend og frontend startes med én kommando hver, uten Docker. Databasefila opp
 | F1 | En opplastet CSV med 24 måneders salg for ett produkt gir en prognose for 6 måneder med P10/P50/P90. |
 | F2 | For hver prognosemåned gjelder P10 ≤ P50 ≤ P90, og ingen verdi er negativ. |
 | F3 | En CSV med flere produkter gir én prognoseserie per produkt, og alle `produkt_id` fra input finnes i output. |
-| F4 | En CSV som mangler en påkrevd kolonne, eller har ugyldig dato eller negativt antall, blir avvist med en feilmelding som sier hva som er feil. |
-| F5 | Et produkt med under 24 måneders historikk blir flagget og får baseline-prognose i stedet for ETS. |
+| F4 | En CSV som mangler en påkrevd kolonne, har ugyldig dato, negativt antall, antall som ikke er et heltall, eller duplikater (samme produkt og måned), blir avvist med en feilmelding som sier hva som er feil. |
+| F5 | Et produkt med 12–23 måneders historikk blir flagget og får bare sesongnaiv prognose. Et produkt med under 12 måneders historikk blir flagget og får ingen prognose. |
 | F6 | Hvert produkt får tre scenarioer der pessimistisk = P10, forventet = P50 og optimistisk = P90, og pessimistisk ≤ forventet ≤ optimistisk. |
 | F7 | Backtesten viser lavere total WAPE for ETS enn for sesongnaiv baseline på det syntetiske datasettet. |
 | F8 | Intervalldekningen for P10–P90 i backtesten på det syntetiske datasettet ligger mellom 65 % og 95 %. |
@@ -251,6 +270,8 @@ Backend og frontend startes med én kommando hver, uten Docker. Databasefila opp
 | F10 | Dashbordet viser historikk, prognose, intervall og scenarioer for valgt produkt uten feil (testet med Playwright). |
 | F11 | Et opplastet datasett med prognose og backtest lagres i SQLite-databasen og kan hentes uendret via API etter at backend er startet på nytt. |
 | F12 | Backend og frontend starter med kommandoene i README uten Docker, hemmeligheter eller API-nøkler. Databasefila opprettes automatisk, og `GET /api/health` svarer OK. |
+| F13 | En CSV med semikolon som skilletegn gir samme resultat som samme fil med komma. |
+| F14 | En manglende måned i en produktserie fylles med 0 og gir en advarsel i valideringsrapporten. |
 
 ### Trinn 2 — funksjonelle kriterier
 
@@ -263,6 +284,6 @@ Backend og frontend startes med én kommando hver, uten Docker. Databasefila opp
 
 ### Prosjektsuksess (IBE160)
 
-- Fungerende prototype som dekker hele v1, med alle kriteriene F1–F12 dekket av automatiske tester som kjører grønt.
+- Fungerende prototype som dekker hele v1, med alle kriteriene F1–F14 dekket av automatiske tester som kjører grønt.
 - Trinn 2 med produksjon vs. lager (B1–B3) er levert hvis tiden tillater det.
 - Dokumentert bruk av KI i utvikling, testing og kvalitetssikring.

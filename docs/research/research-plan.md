@@ -1,12 +1,12 @@
 # Research-plan PROGNOS
 
 ## Uavklarte beslutninger
-- SQLite eller PostgreSQL? (faglærer anbefalte SQLite)
-- Hva skjer med produkter med under 12 måneders historikk? Sesongnaiv trenger minst 12 måneder.
-- Kjøres prognosen automatisk etter opplasting, eller med en knapp?
-- Negative prognoser: settes P10 til 0? (påvirker F2)
-- Scenarioer for 6 måneder totalt: summen av månedlig P10 er ikke P10 for totalen. Hvordan håndterer vi det?
-- Backtest: prognoserer hver opprinnelse 1 eller 6 måneder frem?
+- ~~SQLite eller PostgreSQL? (faglærer anbefalte SQLite)~~ **Besluttet:** SQLite. Se beslutningsloggen: *Database*.
+- ~~Hva skjer med produkter med under 12 måneders historikk? Sesongnaiv trenger minst 12 måneder.~~ **Besluttet:** ingen prognose, og produktet flagges. Se beslutningsloggen: *Kort historikk*.
+- ~~Kjøres prognosen automatisk etter opplasting, eller med en knapp?~~ **Besluttet:** automatisk etter godkjent opplasting. Se beslutningsloggen: *Prognosen kjøres automatisk*.
+- ~~Negative prognoser: settes P10 til 0? (påvirker F2)~~ **Besluttet:** P10, P50 og P90 settes til minst 0. Se beslutningsloggen: *P10, P50 og P90 settes til minst 0*.
+- ~~Scenarioer for 6 måneder totalt: summen av månedlig P10 er ikke P10 for totalen. Hvordan håndterer vi det?~~ **Besluttet:** summen av de månedlige verdiene, med en merknad om at spennet blir bredere enn det reelle. Se beslutningsloggen: *Scenarioer for 6 mnd*.
+- ~~Backtest: prognoserer hver opprinnelse 1 eller 6 måneder frem?~~ **Besluttet:** 1 måned frem, 6 opprinnelser. Se beslutningsloggen: *Backtest*.
 
 ## Teknisk research
 - Les FPP (Hyndman): ETS, prognoseintervaller, tidsserie-kryssvalidering
@@ -34,3 +34,16 @@
 ## Beslutningslogg
 | Beslutning | Begrunnelse | Dato |
 |---|---|---|
+| Database: SQLite i stedet for PostgreSQL | Faglærer anbefalte det. Enbrukerapp som kjører lokalt, og sensor trenger ingen databaseserver. Avvik fra technology.md begrunnes med tilbakemeldingen. | 2026-11-14 |
+| Språk: PRD, dokumentasjon og grensesnitt skrives på norsk | Brukeren og målgruppen er norsk. | 2026-11-14 |
+| Kort historikk: under 12 mnd gir ingen prognose og flagges; 12–23 mnd gir bare sesongnaiv; 24+ mnd gir ETS og baseline | Sesongnaiv trenger minst ett år, ETS med sesong trenger to. | 2026-11-14 |
+| Prognosen kjøres automatisk etter godkjent opplasting | Færre klikk for brukeren, én sammenhengende flyt. | 2026-11-14 |
+| P10, P50 og P90 settes til minst 0 | Salg kan ikke være negativt. Sikrer F2. | 2026-11-14 |
+| Scenarioer for 6 mnd = summen av månedlige P10/P50/P90, med merknad om at spennet er bredere enn det reelle | Enkelt og etterprøvbart. Simulering er for komplisert for v1. | 2026-11-14 |
+| Backtest: rullerende, 6 opprinnelser, horisont 1 måned, step 1. Produkter med under 30 mnd får bare baseline-backtest | Følger briefen. ETS trenger 24 mnd trening. Bekreftes i testskriptet. | 2026-11-14 |
+| Intervaller: 80 % prediksjonsintervall (level=[80]) | Gir P10 og P90 direkte fra statsforecast. | 2026-11-14 |
+| Når ETS taper mot baseline vises ETS, men produktet flagges med begge WAPE-tall | Følger prinsippet «baseline først» uten å skjule noe. | 2026-11-14 |
+| CSV: komma eller semikolon (autodeteksjon), dato ÅÅÅÅ-MM, antall heltall ≥ 0, duplikater gir feil, manglende måneder fylles med 0 og gir advarsel | Norsk Excel bruker ofte semikolon. Holder valideringen enkel og testbar. | 2026-11-14 |
+| Pessimistisk/Forventet/Optimistisk brukes som hovedord i grensesnittet, med P10/P50/P90 som forklaring | Planleggere forstår scenarioer bedre enn kvantiler. | 2026-11-14 |
+| Dashbordet starter med produktliste sortert etter WAPE, med flagg for kort historikk og der ETS taper | Brukeren ser først hvor prognosen er svakest. | 2026-11-14 |
+| Syntetiske data: de fleste produkter har trend i tillegg til sesong og støy | Med trend slår ETS sesongnaiv, så F7 blir realistisk. | 2026-11-14 |
