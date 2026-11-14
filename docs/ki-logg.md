@@ -33,3 +33,24 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
   - `reconcile-brief-tilbakemelding.md`
   - `reconcile-beslutningslogg-arkitektur.md`
   - `.memlog.md`
+
+## 2026-11-14 — Spike for backtest-oppsettet
+
+**Økt:** Ba Claude Code lage og kjøre et testskript som bekrefter backtest-oppsettet i beslutningsloggen. Svarer på åpent spørsmål 1 i PRD §10.
+
+**Hva KI-en gjorde:**
+- Skrev [spikes/backtest_spike.py](../spikes/backtest_spike.py): 3 syntetiske produkter med 36 måneder (sesong, trend, støy), AutoETS og SeasonalNaive fra statsforecast, rullerende backtest med 6 opprinnelser og horisont 1, WAPE og P10–P90-dekning med 80 % intervall og nullgrense.
+- Kjørte skriptet med `uv run`. Med seed 42 holdt F7 (WAPE 0,074 mot 0,112), men F8 holdt ikke (dekning 61,1 %).
+- Kjørte på eget initiativ 20 seeds for å se om resultatet var tilfeldig. F7 og F8 holdt begge i 18 av 20. La deretter til `--seeds` i skriptet, slik at resultatet kan kjøres på nytt.
+- Skrev resultatene i [docs/research/teknisk.md](research/teknisk.md), og oppdaterte PRD §10 og beslutningsloggen.
+
+**Valg jeg tok:**
+- Spiken committes som en del av researchen.
+- Backtest-spørsmålet i PRD §10 regnes som besvart, og beslutningsloggen for backtesten endres ikke.
+- Seeden for det syntetiske datasettet er 42. Den er valgt før datasettet er generert og endres ikke etter at resultatene er sett. Ført i beslutningsloggen.
+
+**Forslag fra KI-en som jeg endret eller presiserte:**
+- KI-en lot spiken være ukommittert fordi jeg kalte den et eksperiment. Jeg bestemte at den skal committes.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md](../.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md)
