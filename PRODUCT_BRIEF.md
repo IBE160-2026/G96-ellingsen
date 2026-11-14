@@ -52,6 +52,10 @@ Andre roller, som materialplanlegger, innkjøp, salg, marked og ledelse, kan ha 
 
 **Målvirksomhet:** Små og mellomstore produksjonsbedrifter som har et MRP/ERP-system, men ikke et eget verktøy for etterspørselsplanlegging.
 
+### Hva skiller PROGNOS fra andre verktøy
+
+Det finnes allerede kommersielle verktøy for etterspørselsplanlegging. Mange ERP-systemer har en innebygd prognosemodul, og det finnes egne planleggingsverktøy med statistiske prognoser, sikkerhetslager og scenarioer. Slike verktøy koster mye og er krevende å innføre, så mange mindre bedrifter fortsetter å bruke regneark. PROGNOS skal ikke konkurrere med disse verktøyene. Det er en studentprototype som viser et prinsipp for bedrifter som i dag bruker regneark: prognosen skal vise hvor usikker den er, og den skal etterprøves mot en enkel referanse.
+
 ---
 
 ## 3. Mål
@@ -88,7 +92,7 @@ v1 består av fem deler. Alt som ikke står her, er utenfor v1.
 
 **1. CSV-import med enkel validering**
 - Opplasting av én CSV-fil med kolonnene `produkt_id`, `maaned` (ÅÅÅÅ-MM) og `antall` fra dashbordet til backend.
-- Godkjente datasett lagres i PostgreSQL, slik at planleggeren kan åpne dem igjen senere.
+- Godkjente datasett lagres i en lokal SQLite-database, slik at planleggeren kan åpne dem igjen senere.
 - Tydelige feilmeldinger ved manglende kolonner, ugyldige datoer og negative eller ikke-numeriske verdier.
 - Produkter med under 24 måneders historikk blir flagget og får bare baseline-prognose.
 
@@ -117,6 +121,41 @@ Totalt volum for de 6 månedene vises for hvert scenario.
 - Next.js-app med opplasting, datasettvelger og produktvelger.
 - Graf per produkt (Recharts): historikk, prognose (P50) og intervall (P10–P90) som skyggelagt bånd.
 - Tabell med scenarioer og backtest-resultat for valgt produkt, og en WAPE-oversikt for alle produkter.
+
+Skisse av dashbordet (én side):
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ PROGNOS     Datasett: [salg_2026-10.csv ▾]          [ Last opp CSV ] │
+│             ✓ 20 produkter godkjent · 1 flagget (kort historikk)     │
+├────────────────────┬─────────────────────────────────────────────────┤
+│ PRODUKTER          │ GRAF: P-104 Ventilhus                           │
+│ Søk: [________]    │                                                 │
+│                    │ antall                                          │
+│   P-101  WAPE 12 % │   │       historikk          prognose           │
+│   P-102  WAPE  9 % │   │  /\    /\    /\       ░░▒▒▒▒▒░░ ← P10–P90   │
+│ ● P-104  WAPE 14 % │   │ /  \__/  \__/  \____▒▒───────▒▒ ← P50       │
+│   P-117  ⚠ kort    │   │                       ░░▒▒▒▒▒░░             │
+│   ...              │   └───────────────────────┼──────────── måned   │
+│                    │                         i dag                   │
+│                    ├────────────────────────┬────────────────────────┤
+│                    │ SCENARIOER (6 mnd)     │ BACKTEST (siste 6 mnd) │
+│                    │ Pessimistisk (P10)  820│ WAPE ETS          14 % │
+│                    │ Forventet    (P50)  960│ WAPE sesongnaiv   21 % │
+│                    │ Optimistisk  (P90) 1110│ ETS slår baseline   ✓  │
+│                    │                        │ Dekning P10–P90   80 % │
+├────────────────────┴────────────────────────┴────────────────────────┤
+│ WAPE-OVERSIKT, ALLE PRODUKTER:  ETS 13 % · sesongnaiv 19 % · 17/20 ✓ │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+- **Øverst:** datasettvelger og knapp for opplasting. Valideringsresultatet vises rett under, med feilmeldinger hvis filen blir avvist.
+- **Venstre:** produktvelger med WAPE per produkt. Produkter med kort historikk er merket.
+- **Midten:** graf for valgt produkt med historikk, P50 og P10–P90 som skyggelagt bånd.
+- **Under grafen:** scenariotabell til venstre og backtest til høyre.
+- **Nederst:** WAPE-oversikt for alle produkter, ETS mot baseline.
+
+Tallene i skissen er bare eksempler.
 
 **Syntetiske testdata (støtte for v1)**
 - Et skript genererer et datasett med **kjent trend, sesong og støy** (fast seed, så dataene blir like hver gang).
@@ -168,7 +207,7 @@ På lang sikt kan PROGNOS bli en komplett modul for etterspørselsstyring som er
 
 ## 5. Teknisk tilnærming (v1)
 
-Stacken følger gruppens arkitekturbeskrivelse i [technology.md](.docs/planning-artifacts/architecture/technology.md): backend i FastAPI, frontend i Next.js og database i PostgreSQL. Vi tar bare med de delene v1 trenger.
+PROGNOS v1 er en enbrukerapp som kjører lokalt: backend i FastAPI, frontend i Next.js og en lokal **SQLite**-database. For backend og frontend følger vi stacken i [technology.md](.docs/planning-artifacts/architecture/technology.md). Den bruker PostgreSQL, men vi velger SQLite: en enbrukerapp trenger ingen egen databasetjeneste, og da trenger verken gruppen eller sensor Docker for å kjøre appen. Innlogging, betaling, e-post, Redis, proxy og deploy er ikke med i v1. Komponenter, API og datamodell beskrives i arkitekturdokumentet (steg 4). Utkastet ligger i [arkitektur-utkast.md](.docs/planning-artifacts/architecture/arkitektur-utkast.md).
 
 ### Arkitektur
 
@@ -176,56 +215,17 @@ Stacken følger gruppens arkitekturbeskrivelse i [technology.md](.docs/planning-
 Nettleser
    │  relative /api-kall (single-origin)
    ▼
-frontend (Next.js)  ──/api──►  backend (FastAPI)  ──►  PostgreSQL 16
+frontend (Next.js)  ──/api──►  backend (FastAPI)  ──►  SQLite (lokal fil)
  opplasting, dashbord,          validering, ETS +        datasett, salgsdata,
  grafer og tabeller             sesongnaiv, scenarioer,  prognoser og
                                 backtest (WAPE)          backtest-resultater
 ```
 
-Lokalt kjøres alle tre tjenestene med Docker Compose. Frontend videresender `/api/*` til backend, så nettleseren bare snakker med én adresse og det ikke trengs CORS.
-
-### Komponenter
-
-| Lag | Teknologi | Kommentar |
-|---|---|---|
-| **Backend** | Python 3.12, **FastAPI** + Uvicorn, Pydantic 2, `uv` | API for opplasting, prognose og resultater. |
-| **Prognose** | `statsforecast` (`AutoETS`, `SeasonalNaive`), `pandas`, `numpy` | Kjøres i backend og gir prediksjonsintervaller direkte. |
-| **Database** | **PostgreSQL 16** (Docker), SQLAlchemy 2 (async) + `asyncpg`, Alembic | Lagrer datasett, salgsdata, prognoser og backtest. |
-| **Frontend** | **Next.js 16** (App Router), React 19, TypeScript 5, Tailwind CSS v4, shadcn/ui | Dashbordet. |
-| **Data i frontend** | TanStack Query v5, `zod` | Henting og validering av API-svar. |
-| **Grafer** | Recharts | Historikk, P50 og P10–P90-bånd. |
-| **Lokal kjøring** | Docker Compose (`frontend`, `backend`, `db`) | `docker compose up` starter hele appen. |
-| **Tester** | `pytest` + `pytest-asyncio` (backend), Vitest (frontend), Playwright (e2e) | Kriteriene i avsnitt 6 skrives som testtilfeller. |
-
-### API (v1)
-
-| Endepunkt | Funksjon |
-|---|---|
-| `POST /api/datasets` | Laster opp CSV, validerer og lagrer datasettet. Gir valideringsrapport eller feilmeldinger. |
-| `POST /api/datasets/{id}/forecast` | Kjører ETS, sesongnaiv, scenarioer og backtest, og lagrer resultatet. |
-| `GET /api/datasets/{id}/products` | Lister produkter med WAPE for ETS og baseline. |
-| `GET /api/datasets/{id}/products/{produkt_id}` | Historikk, prognose (P10/P50/P90), scenarioer og backtest for ett produkt. |
-| `GET /api/health` | Helsesjekk. |
-
-### Datamodell (v1)
-
-| Tabell | Innhold |
-|---|---|
-| `dataset` | id, filnavn, opplastet tidspunkt, valideringsstatus |
-| `sales` | dataset_id, produkt_id, maaned, antall |
-| `forecast` | dataset_id, produkt_id, maaned, modell, p10, p50, p90 |
-| `backtest_result` | dataset_id, produkt_id, modell, wape, intervalldekning |
-
-Trinn 2 legger til en tabell `inventory` (produkt_id, lager, ledetid_mnd) og endepunkter for anbefaling og forklaring.
-
-### Fra technology.md: med og ikke med i v1
-
-- **Med:** FastAPI, Next.js og PostgreSQL med Alembic-migrasjoner, Docker Compose lokalt, mock-fallback-prinsippet, seeding ved oppstart (`seed_if_empty`) og feature flags for trinn 2.
-- **Ikke med:** innlogging og brukerkontoer, betaling (Stripe/Vipps), e-post, Supabase Storage, Redis, Caddy-proxy, capability-tokens, Railway-deploy, backup og overvåking. PROGNOS v1 er en enbrukerapp som kjører lokalt.
+Backend og frontend startes med én kommando hver, uten Docker. Databasefila opprettes automatisk første gang backend starter. Frontend videresender `/api/*` til backend, så nettleseren bare snakker med én adresse og det ikke trengs CORS.
 
 ### Prinsipper
 
-- **Null konfigurasjon:** Appen starter lokalt uten hemmeligheter eller API-nøkler. Integrasjoner som mangler nøkkel, som språkmodellen i trinn 2, faller tilbake til deterministiske mock-svar.
+- **Null konfigurasjon:** Appen starter lokalt uten Docker, hemmeligheter eller API-nøkler. Integrasjoner som mangler nøkkel, som språkmodellen i trinn 2, faller tilbake til deterministiske mock-svar.
 - **Baseline først:** ETS måles alltid mot sesongnaiv. Hvis ETS ikke slår baseline for et produkt, vises det tydelig.
 - **Kjente data:** Utvikling og testing skjer på syntetiske data med kjent fasit.
 - **Etterprøvbart:** Scenarioer og beslutningsregler er enkle nok til at brukeren kan regne dem etter.
@@ -249,8 +249,8 @@ Trinn 2 legger til en tabell `inventory` (produkt_id, lager, ledetid_mnd) og end
 | F8 | Intervalldekningen for P10–P90 i backtesten på det syntetiske datasettet ligger mellom 65 % og 95 %. |
 | F9 | Generatoren for syntetiske data gir identisk datasett ved samme seed. |
 | F10 | Dashbordet viser historikk, prognose, intervall og scenarioer for valgt produkt uten feil (testet med Playwright). |
-| F11 | Et opplastet datasett med prognose og backtest lagres i PostgreSQL og kan hentes uendret via API etter at backend er startet på nytt. |
-| F12 | `docker compose up` starter frontend, backend og database uten at noen hemmeligheter eller API-nøkler er satt, og `GET /api/health` svarer OK. |
+| F11 | Et opplastet datasett med prognose og backtest lagres i SQLite-databasen og kan hentes uendret via API etter at backend er startet på nytt. |
+| F12 | Backend og frontend starter med kommandoene i README uten Docker, hemmeligheter eller API-nøkler. Databasefila opprettes automatisk, og `GET /api/health` svarer OK. |
 
 ### Trinn 2 — funksjonelle kriterier
 
