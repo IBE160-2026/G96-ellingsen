@@ -14,3 +14,5 @@
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — oppdatere `arkitektur-utkast.md` på de 5 punktene der det er utdatert mot beslutningsloggen
 - [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — legge til en regel for `*.db` i `.gitignore` (NFR-9) (løst 2026-11-14)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — åpne spørsmål i PRD §10: spike for backtest-oppsettet, ERP-eksportformater, validering av personaen
+- [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — kjøre spiken på nytt mot det ekte syntetiske datasettet (~20 produkter) når generatoren finnes. F8 feilet med seed 42 og 3 produkter (61 %), og holdt i 18 av 20 seeds
+- [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — vurdere om ETS-intervallene er for smale (dekning ned mot 50 % per produkt), siden det kan treffe F8 nedre grense på 65 %
