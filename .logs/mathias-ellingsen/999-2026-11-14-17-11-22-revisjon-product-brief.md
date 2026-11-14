@@ -39,7 +39,7 @@ Samkjøre briefen med Bårds `technology.md`: v1 skal bruke FastAPI, Next.js og 
   - En liste over hva fra `technology.md` som ikke er med i v1: innlogging, betaling, e-post, Supabase, Redis, Caddy, Railway og backup.
 - Avsnitt 4.1 sier nå at datasett lagres i databasen og at testdata seedes ved oppstart.
 - F10 testes nå med Playwright i stedet for Streamlit `AppTest`. Nye kriterier: F11 (lagring i PostgreSQL) og F12 (`docker compose up` uten hemmeligheter).
-- Commit `08a5cda`. Punktet om samkjøring med `technology.md` i `issues.md` er lukket.
+- Commit `08a5cda`, pushet til `origin/main`. Punktet om samkjøring med `technology.md` i `issues.md` er lukket.
 
 ### Åpne punkter
 - Den nye stacken gir mer arbeid i v1 enn Streamlit-løsningen (to språk, database, migrasjoner, Docker). Gruppen bør vurdere om v1 fortsatt rekkes i semesteret.
