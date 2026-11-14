@@ -12,7 +12,7 @@
 - Les FPP (Hyndman): ETS, prognoseintervaller, tidsserie-kryssvalidering
 - Les statsforecast-dokumentasjon: AutoETS, SeasonalNaive, cross_validation
 - WAPE: definisjon og hvorfor den brukes i stedet for MAPE
-- Testskript (spike): slår ETS baseline? Blir P10 negativ? Hvor god er P10–P90-dekningen?
+- ~~Testskript (spike): slår ETS baseline? Blir P10 negativ? Hvor god er P10–P90-dekningen?~~ **Besvart 2026-11-14:** ETS slår baseline i 18 av 20 seeds, P10 ble aldri negativ, og P10–P90-dekningen for ETS var i snitt 76,7 % (innenfor 65–95 % i 18 av 20). Se [teknisk.md](teknisk.md).
 - Syntetiske data: hvordan lage serier slik at F7 og F8 holder?
 
 ## Brukerbehov
