@@ -1,0 +1,21 @@
+# Alle tekstfiler lagres og sjekkes ut med LF, uavhengig av operativsystem
+# og core.autocrlf-innstilling.
+* text=auto eol=lf
+
+# Binærfiler skal aldri konverteres.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.webp   binary
+*.pdf    binary
+*.zip    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.sqlite binary
+*.db     binary
+*.xlsx   binary
+*.docx   binary
+*.pptx   binary
