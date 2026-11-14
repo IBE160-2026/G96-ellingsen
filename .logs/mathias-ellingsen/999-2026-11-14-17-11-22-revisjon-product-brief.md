@@ -21,3 +21,25 @@ Revidere `PRODUCT_BRIEF.md` etter tilbakemelding om at omfanget var for stort: v
 - Det syntetiske testdatasettet og generatoren finnes ikke ennå. Det trengs før F7–F9 kan testes.
 - Valgte terskler må vurderes av gruppen: 24 måneders minimumshistorikk, 6 måneders horisont og 65–95 % intervalldekning (F8).
 - `.docs/planning-artifacts/architecture/technology.md` beskriver FastAPI, Next.js og PostgreSQL. Den reviderte briefen bruker Streamlit uten database i v1, så dokumentene må samkjøres.
+
+## 2026-11-14 kl. 17:15 — Mathias Ellingsen
+
+### Oppgave
+Samkjøre briefen med Bårds `technology.md`: v1 skal bruke FastAPI, Next.js og PostgreSQL i stedet for Streamlit uten database.
+
+### Plan
+- Lese `technology.md` og ta med bare de delene v1 trenger.
+- Oppdatere avsnitt 4 og 5 og suksesskriteriene i `PRODUCT_BRIEF.md`, og committe.
+
+### Resultat
+- Avsnitt 5 i `PRODUCT_BRIEF.md` er skrevet om:
+  - FastAPI-backend, Next.js-dashbord (Recharts) og PostgreSQL 16 med SQLAlchemy og Alembic, kjørt lokalt med Docker Compose.
+  - API-endepunkter og datamodell for v1.
+  - Mock-fallback og feature flags (`FEATURE_DECISION`, `FEATURE_AI`) for trinn 2.
+  - En liste over hva fra `technology.md` som ikke er med i v1: innlogging, betaling, e-post, Supabase, Redis, Caddy, Railway og backup.
+- Avsnitt 4.1 sier nå at datasett lagres i databasen og at testdata seedes ved oppstart.
+- F10 testes nå med Playwright i stedet for Streamlit `AppTest`. Nye kriterier: F11 (lagring i PostgreSQL) og F12 (`docker compose up` uten hemmeligheter).
+- Commit `08a5cda`. Punktet om samkjøring med `technology.md` i `issues.md` er lukket.
+
+### Åpne punkter
+- Den nye stacken gir mer arbeid i v1 enn Streamlit-løsningen (to språk, database, migrasjoner, Docker). Gruppen bør vurdere om v1 fortsatt rekkes i semesteret.
