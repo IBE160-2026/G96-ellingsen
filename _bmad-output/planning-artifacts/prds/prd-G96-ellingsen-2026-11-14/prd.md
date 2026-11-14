@@ -581,7 +581,7 @@ Disse punktene stod ikke direkte i kildene. De ble foreslått i PRD-arbeidet og 
 
 ### 11.2 Presiseringer fra gjennomgangen
 
-Gruppen godkjente at funn med middels og lav alvorlighetsgrad skulle rettes. Disse presiseringene ble valgt i rettingen og bør leses gjennom en ekstra gang:
+Gruppen godkjente at funn med middels og lav alvorlighetsgrad skulle rettes. Disse presiseringene ble valgt i rettingen og godkjent av gruppen 2026-11-14:
 
 - **Horisont og utfylling (§3, FR-4, FR-8)** — Siste måned i datasettet er felles for alle produktene. Et produkt som mangler de siste månedene, fylles med 0 til og med den og får en advarsel. Horisonten og backtest-månedene er dermed like for alle produktene.
 - **Historikklengde (§3, FR-5)** — Begge endepunktene telles med (2024-11 til 2026-10 = 24 måneder).

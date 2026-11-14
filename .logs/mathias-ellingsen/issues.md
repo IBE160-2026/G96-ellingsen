@@ -9,7 +9,7 @@
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — avklare hva som skjer med produkter med under 12 måneders historikk (sesongnaiv trenger 12), og oppdatere F5 i briefen (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — føre beslutningene fra research-planen inn i PRODUCT_BRIEF.md (venter på godkjenning av forslagene) (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — ta med de nye reglene fra briefen (80 %-nivå, nullgrense, backtest-oppsett, CSV-validering) i arkitekturdokumentet i steg 4 (løst 2026-11-14)
-- [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — gruppen leser gjennom presiseringene i PRD §11.2 (felles siste måned, historikknivået *sesongnaiv*, historikklengde med begge endepunktene, ingen lagring hvis kjøringen feiler)
+- [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — gruppen leser gjennom presiseringene i PRD §11.2 (felles siste måned, historikknivået *sesongnaiv*, historikklengde med begge endepunktene, ingen lagring hvis kjøringen feiler) (løst 2026-11-14)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — arkitekturen: datamodell og API for total WAPE, verdier per opprinnelse, endepunkt for oppsummering og lagret valideringsrapport (H6, se addendum)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — oppdatere `arkitektur-utkast.md` på de 5 punktene der det er utdatert mot beslutningsloggen
 - [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — legge til en regel for `*.db` i `.gitignore` (NFR-9) (løst 2026-11-14)
