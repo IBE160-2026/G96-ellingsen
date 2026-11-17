@@ -207,3 +207,25 @@ Etter rettingene ble kontrollen kjørt på nytt. Alt var dekket, ingen story avh
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/992-2026-11-17-20-40-46-epics-og-stories.md](../.logs/mathias-ellingsen/992-2026-11-17-20-40-46-epics-og-stories.md)
 - [epics.md](../_bmad-output/planning-artifacts/epics.md)
+
+## 2026-11-17 — Story 1.1: Backend-skjelett med automatisk database og helsesjekk
+
+**Økt:** Implementerte Story 1.1 med `/bmad-build` (Claude Code). KI-en skrev en spesifikasjon som jeg godkjente. Deretter implementerte en subagent den, og tre uavhengige reviewere gikk gjennom koden. Etterpå kjørte jeg testene og helsesjekken selv.
+
+**Hva som ble bygget:**
+- `backend/` som uv-prosjekt med versjonene fra arkitekturens *Stack*-tabell låst.
+- `lag_app(db_sti)` som eneste app-fabrikk, og `python -m prognos --db STI --port N` (AD-14).
+- En versjonsvakt før `create_all`. Databasefila og tabellen `skjemaversjon` opprettes automatisk, og et gammelt skjema stopper backend med den faste meldingen (AD-13).
+- `GET /api/health` som svarer `{"status": "ok"}`, og norsk `{detail}` på HTTP-feil (AD-9).
+- En importtest som sjekker at `domene/` ikke importerer `fastapi`, `sqlalchemy`, `prognos.api` eller `prognos.db` (AD-1).
+- 19 pytest-tester, alle grønne.
+
+**Gjennomgang:** De tre reviewerne ga 20 funn. 9 ble rettet: blant annet at en egen feiltekst fra en rute beholdes, at en sti med `#` eller `?` fungerer, flere tester for versjonsvakten og SQLite-sidefiler i `.gitignore`. 11 ble avvist med begrunnelse, fordi de var ikke-nåbare, feilet allerede høylytt eller gjaldt tekst som er fastsatt i arkitekturen. Hele triagen står i spesifikasjonen.
+
+**Åpne punkter:**
+- Valideringsfeil (422) og uventede unntak gir fortsatt FastAPIs engelske svar. Det må håndteres i Epic 3, når `POST /api/datasets` kommer (AD-9).
+- `fastapi 0.163.2` i `uv.lock` ble publisert samme dag. Vi følger med på om det kommer en rask patch.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md](../.logs/mathias-ellingsen/990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md)
+- [Spesifikasjon for Story 1.1](../_bmad-output/implementation-artifacts/spec-1-1-backend-skjelett-med-automatisk-database-og-helsesjekk.md)
