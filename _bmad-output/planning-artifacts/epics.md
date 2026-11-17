@@ -1060,6 +1060,7 @@ slik at jeg kan stole på dem og regne dem etter fra tallene som vises.
 **Then** er `total_wape.ets` lavere enn `total_wape.sesongnaiv` (F7)
 **And** `total_dekning.ets` ligger mellom 0,65 og 0,95 (F8)
 **And** hvis F7 eller F8 feiler, føres det som et funn i `issues.md`. Datasettet justeres ikke for å få testen grønn (SM-C1), og intervallnivået endres ikke (SM-C2). Dette lukker også det åpne punktet om å kjøre spiken på nytt mot `syntetisk.csv`
+**And** en F7- eller F8-test som feiler, merkes med `pytest.mark.xfail(strict=True)` og en `reason` som viser til funnet i `issues.md` (se beslutningsloggen i `docs/research/research-plan.md`)
 
 **Given** at backend lages på nytt mot samme databasefil
 **When** alle de fire lese-endepunktene kalles

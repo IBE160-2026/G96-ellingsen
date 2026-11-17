@@ -1,0 +1,82 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 11-17-2026 20:44
+last_updated: 11-17-2026 20:44
+project: G96-ellingsen
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-backend-skjelett-med-automatisk-database-og-helsesjekk: backlog
+  1-2-frontend-skjelett-med-proxy-til-backend: backlog
+  1-3-readme-repohygiene-og-kontroll-av-oppstarten: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-generator-for-syntetisk-salgshistorikk-med-fasit: backlog
+  2-2-stoeyfritt-kontrollprodukt-og-stort-datasett-for-svartid: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-csv-leser-med-gjenkjenning-av-skilletegn: backlog
+  3-2-validering-av-rader-med-fullstendig-feilliste: backlog
+  3-3-utfylling-historikknivaa-og-godkjent-rapport: backlog
+  3-4-opplasting-gjennom-api-et-med-lagring-i-en-transaksjon: backlog
+  3-5-en-opplasting-om-gangen-og-serverfrist: backlog
+  3-6-lese-endepunkter-og-gjenaapning-etter-omstart: backlog
+  3-7-syntetisk-datasett-ved-foerste-oppstart: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-prognose-per-produkt-med-nullgrense-og-heltallsavrunding: backlog
+  4-2-scenarioer-scenariototaler-og-kontroll-mot-fasiten: backlog
+  4-3-prognose-og-scenarioer-i-opplastingen-og-i-api-et: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-rullerende-backtest-i-kjernen: backlog
+  5-2-wape-intervalldekning-og-totaler: backlog
+  5-3-dommer-flagget-ets-taper-og-rangering-med-wape: backlog
+  5-4-backtest-i-opplastingen-og-i-api-et: backlog
+  5-5-svartid-for-et-datasett-paa-karis-stoerrelse: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-api-klient-kontrakt-og-dashbordskall-med-designtokens: backlog
+  6-2-topplinje-opplasting-og-valideringsrapport: backlog
+  6-3-rapport-ved-feilet-kjoering-opptatt-tjeneste-tidsavbrudd-og-i: backlog
+  6-4-produktliste-med-de-svakeste-oeverst-og-soek: backlog
+  6-5-graf-med-historikk-prognose-og-spenn: backlog
+  6-6-scenariotabell-backtest-tabell-og-detaljer-per-opprinnelse: backlog
+  6-7-wape-oversikt-for-alle-produkter: backlog
+  6-8-tilgjengelighet-responsiv-layout-og-hele-arbeidsflyten: backlog
+  epic-6-retrospective: optional

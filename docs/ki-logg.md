@@ -175,7 +175,7 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
   4. prognose og scenarioer
   5. backtest
   6. dashbord
-- Skrev 30 stories: Epic 1 (3), Epic 2 (2), Epic 3 (7), Epic 4 (3), Epic 5 (5) og Epic 6 (8).
+- Skrev 28 stories: Epic 1 (3), Epic 2 (2), Epic 3 (7), Epic 4 (3), Epic 5 (5) og Epic 6 (8).
 - Hver story har feltene **Dekker** (FR, F, AD og eventuelt NFR og UX-DR) og **Tester i storyen**, i tillegg til akseptansekriterier på formen Given/When/Then. Testene skrives i samme story som koden.
 - Hver tabell opprettes i den første storyen som trenger den, med ny `SKJEMAVERSJON` hver gang.
 - Kjørte en maskinell dekningskontroll av alle FR, NFR, F, AD og UX-DR, og en sjekk av alle henvisningene mellom storyene.
