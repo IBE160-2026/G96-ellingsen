@@ -1,6 +1,6 @@
 # Addendum til PRD: PROGNOS v1
 
-Dette er tekniske føringer fra briefens avsnitt 5, beslutningsloggen og arkitekturutkastet. De hører hjemme i arkitekturdokumentet og står her for å binde kravene i PRD-en til valgene som allerede er gjort. Den fullstendige tekniske beskrivelsen finnes i [arkitektur-utkast.md](../../../../.docs/planning-artifacts/architecture/arkitektur-utkast.md).
+Dette er tekniske føringer fra briefens avsnitt 5, beslutningsloggen og arkitekturutkastet. De hører hjemme i arkitekturdokumentet og står her for å binde kravene i PRD-en til valgene som allerede er gjort. Den fullstendige tekniske beskrivelsen finnes i [ARCHITECTURE-SPINE.md](../../architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md). Den erstattet [arkitektur-utkast.md](../../../../.docs/planning-artifacts/architecture/arkitektur-utkast.md) 2026-11-17.
 
 **Når kildene sier forskjellig:** Ved avvik mellom arkitekturutkastet og beslutningsloggen gjelder beslutningsloggen og PRD-en. Det gjelder nå radene *Total WAPE*, *Sortering av produktlisten*, *Backtest for 12–17 mnd*, *WAPE når faktisk salg er 0* og *Intervalldekning og sortering*. Utkastet oppdateres når arkitekturen lages.
 
@@ -15,7 +15,7 @@ Dette er tekniske føringer fra briefens avsnitt 5, beslutningsloggen og arkitek
 | FR-25 | `seed_if_empty` ved oppstart av backend. |
 | NFR-1 | `uv run` (backend) og `npm run dev` (frontend), uten Docker. Frontend videresender `/api/*` til backend (single-origin, ingen CORS). |
 | NFR-6 | `pytest` + `pytest-asyncio`, Vitest og Playwright (F10). |
-| NFR-7 | `statsforecast` bruker `numba`, som kompilerer ved første kall. Kompileringen bufres (`cache=True`), og tidtakingen gjøres etter én oppvarmingskjøring. Kaldstart måles og rapporteres, men har ingen grense. |
+| NFR-7 | Tidtakingen gjøres etter én oppvarmingskjøring. Kaldstart måles og rapporteres, men har ingen grense. *Rettet 2026-11-17:* `statsforecast` 2.1.1 bruker ikke `numba`, så det er ingen kompileringsbuffer å sette opp. Se AD-2 og *Deferred* i arkitekturen. |
 
 ## Kjøring uten nett (NFR-1)
 
@@ -29,6 +29,8 @@ Fra arkitekturutkastet:
 
 - `POST /api/datasets`, `GET /api/datasets`, `GET /api/datasets/{id}/products`, `GET /api/datasets/{id}/products/{produkt_id}`, `GET /api/health`.
 - Tabeller: `dataset`, `sales` (med `utfylt`), `product_status` (med `historikknivaa`, `ets_taper`), `forecast`, `backtest_result`.
+
+**Løst i arkitekturen 2026-11-17:** Alle fem punktene under er løst i [ARCHITECTURE-SPINE.md](../../architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md): punkt 1 og 2 i AD-3 og AD-4, punkt 3 og 4 i AD-8 og AD-9, og punkt 5 i AD-6. Arkitekturen erstatter arkitekturutkastet.
 
 **Utsatt til arkitekturen (funn H6 i PRD-gjennomgangen):** Datamodellen og API-et i utkastet kan ikke levere alt PRD-en krever.
 

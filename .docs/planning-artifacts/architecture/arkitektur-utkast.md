@@ -1,3 +1,5 @@
+> **Erstattet 2026-11-17.** Dette utkastet gjelder ikke lenger. Det er erstattet av [ARCHITECTURE-SPINE.md](../../../_bmad-output/planning-artifacts/architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md), som også retter de fem punktene der utkastet var utdatert mot beslutningsloggen (*Total WAPE*, *Sortering av produktlisten*, *Backtest for 12–17 mnd*, *WAPE når faktisk salg er 0* og *Intervalldekning og sortering*). Teksten under står uendret for sporbarheten.
+
 # Arkitektur — utkast (input til steg 4)
 
 Flyttet fra avsnitt 5 i [PRODUCT_BRIEF.md](../../../PRODUCT_BRIEF.md) og oppdatert etter beslutningsloggen i [research-plan.md](../../../docs/research/research-plan.md). Dette er grunnlaget for arkitekturdokumentet vi lager i steg 4. Det er ikke et ferdig dokument.

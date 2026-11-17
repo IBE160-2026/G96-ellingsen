@@ -119,3 +119,45 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/996-2026-11-14-19-57-25-prd.md](../.logs/mathias-ellingsen/996-2026-11-14-19-57-25-prd.md)
 - [prd.md](../_bmad-output/planning-artifacts/prds/prd-G96-ellingsen-2026-11-14/prd.md) og [research-plan.md](research/research-plan.md)
+
+## 2026-11-17 — Arkitektur for PROGNOS v1
+
+**Økt:** Laget arkitekturen med `/bmad-architecture` (Claude Code), coaching path. Grunnlaget var PRD, addendum, UX-spesifikasjonen, beslutningsloggen, teknisk.md, issues.md og arkitekturutkastet. Rammene var SQLite, ingen Docker og statsforecast som eneste ML-bibliotek.
+
+**Hva KI-en gjorde:**
+- La fram alternativene for de bærende valgene i to runder, med en anbefaling for hvert.
+- Sjekket versjonene mot PyPI og npm og leste kildekoden til Next.js. Fant at statsforecast 2.1.1 krever `pandas<3`, og at rewrite-proxyen i Next.js bryter forespørsler etter 30 s.
+- Skrev ARCHITECTURE-SPINE.md med AD-1 til AD-15. Den løser H6 (total WAPE, verdier per opprinnelse, oppsummering og lagret rapport) og de 5 punktene der utkastet var utdatert.
+- Kjørte fem uavhengige gjennomganger som subagenter: avstemming mot PRD, avstemming mot UX og logg, rubrikk, teknologiverifisering og et adversarialt angrep. Rettet funnene.
+- Kjørte to små eksperimenter med statsforecast. Det ene avkreftet et påstått kritisk funn (NaN ved 12 måneder). Det andre viste at AutoETS takler null-serier og konstante serier.
+- Skrev en forklaring for sensor og språkvasket den med `bmad-review`.
+
+**Valg jeg tok:**
+- Functional core, imperative shell med pipeline, og alt lagres i én transaksjon.
+- WAPE, dekning, totaler og rekkefølge regnes én gang ved opplasting og lagres. API og frontend regner aldri på nytt.
+- P10/P50/P90 rundes til heltall før metrikkene regnes ut, slik at tallene Kari ser, kan regnes etter (NFR-5).
+- `create_all` med versjonsvakt i stedet for Alembic.
+- Seks endepunkter, der rapporten og WAPE-oversikten kommer fra `GET /api/datasets/{id}`.
+- Pydantic er kontrakten, og zod speiles for hånd.
+- Modellkjøringen går i trådpool, med én opplasting om gangen.
+- Norsk snake_case helt ut i frontend.
+- Kildene oppstrøms oppdateres: ny rad i beslutningsloggen, PRD §11.3, addendum og en merknad om at utkastet er erstattet.
+
+**Funn fra gjennomgangen som ble rettet:**
+- **Avhengigheter:** `sqlalchemy[asyncio]` og `python-multipart` manglet. Uten dem ville backend ikke startet.
+- **Tidsavbrudd:** Klienten ga opp etter 120 s, men serveren kunne likevel lagre. Nå forkaster serveren resultatet etter 110 s, slik at «Ingenting er lagret» stemmer.
+- **Feilsvar:** FastAPIs egne feilsvar var engelske og hadde en annen form. Alle svar fra opplastingen har nå samme form med norsk melding, og klienten har faste regler for *Kjøring feilet* og *Ingen kontakt*.
+- **Lagrede felt:** Scenariototal, `backtest_nivaa` og historikklengde manglet blant de lagrede feltene. «Lik WAPE» sammenlignes nå på heltall.
+- **Tom mengde:** Når ingen produkter har backtest for begge modellene, er `m` og `n` 0 i stedet for `null`.
+- **Regler for statsforecast:** dato, frekvens og opprinnelse, og hvordan produkter med ulik lengde kjøres i samme kall.
+- **CSV-lesing:** radnummer, mellomrom og heltall, valg av skilletegn når en kolonne mangler, rekkefølgen på feil, og to nye feilmaler. Malene og teksten for 409 er ført inn i EXPERIENCE.md.
+- **Skjema og tester:** Versjonsvakten kjører før `create_all`, testene bruker en egen database uten miljøvariabler, og generatoren lager byte-identiske filer på alle operativsystemer.
+- **Next.js:** `next dev` sjekker versjoner mot npm. Dette er skrudd av der det går, og avgrenset i NFR-1.
+- **Avvist funn:** Det kritiske funnet om NaN fra SeasonalNaive ved 12 måneder ble avkreftet med et eksperiment og ikke tatt inn.
+
+**Forslag fra KI-en som jeg endret eller presiserte:**
+- Leveransen: jeg ba om en forklaring for sensor i tillegg til spine-dokumentet. Jeg ba også om at utkastet ikke skulle skrives om, men få en merknad om at det er erstattet, slik at historikken kan spores.
+- Etterpå ba jeg om at de nye feilmalene og teksten for «opplasting pågår» ble ført inn i EXPERIENCE.md med en gang, i stedet for å stå som åpent punkt.
+
+**Kilder:**
+- [ARCHITECTURE-SPINE.md](../_bmad-output/planning-artifacts/architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md), [forklaring-for-sensor.md](../_bmad-output/planning-artifacts/architecture/architecture-G96-ellingsen-2026-11-17/forklaring-for-sensor.md) og `reviews/` i samme mappe

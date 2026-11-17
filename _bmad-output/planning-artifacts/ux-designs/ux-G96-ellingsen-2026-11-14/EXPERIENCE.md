@@ -2,7 +2,7 @@
 name: PROGNOS
 status: final
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-17
 sources:
   - ../../prds/prd-G96-ellingsen-2026-11-14/prd.md
   - ../../prds/prd-G96-ellingsen-2026-11-14/addendum.md
@@ -112,6 +112,10 @@ De fire første tekstene er fastsatt ordrett i PRD-en (§11.2). Resten er maler 
 | Tom celle | «Rad {r}: tom celle i {kolonne}» |
 | Duplikat | «Duplikat: {produkt_id}, {ÅÅÅÅ-MM} (rad {r1} og {r2})» |
 | Ingen datarader | «Fila har ingen datarader» |
+| Feil antall felt i en rad (for eksempel `12,5` i en fil med komma) | «Rad {r}: har {k} felt, men overskriften har {h}» |
+| Fila er ikke UTF-8 | «Fila er ikke lagret som UTF-8. Lagre den som «CSV UTF-8» i Excel og prøv igjen.» |
+
+De to siste malene kom fra arkitekturen (AD-15 i [ARCHITECTURE-SPINE.md](../../architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md)). Alle meldingene i valideringsrapporten lages ferdig av backend, og frontend viser dem uendret.
 
 **Øvrige faste tekster.** Tilstandene i *State Patterns* viser hit.
 
@@ -120,6 +124,7 @@ De fire første tekstene er fastsatt ordrett i PRD-en (§11.2). Resten er maler 
 | «Fila ble avvist. Ingenting er lagret.» + «{n} feil» | Overskrift i rød rapport, *Fil avvist* |
 | «Prognosen kunne ikke kjøres. Ingenting er lagret.» | Overskrift i rød rapport, *Kjøring feilet* |
 | «Kjøringen tok mer enn to minutter og ble stoppet.» | Under overskriften ved tidsavbrudd |
+| «En annen opplasting pågår allerede. Vent til den er ferdig, og prøv igjen.» | Under overskriften ved *Opplasting pågår allerede* (409). Teksten kommer fra backend. |
 | «Får ikke kontakt med PROGNOS-tjenesten. Sjekk at den kjører, og last siden på nytt.» | Rød rapport, *Ingen kontakt med backend* |
 | «Kunne ikke hente data for {produkt_id}» + «Prøv igjen» | Grafområdet, *Produktdetalj kunne ikke hentes* |
 | «Ingen produkter matcher «{søk}».» + «Tøm søk» | Produktlisten, *Søk uten treff* |
@@ -176,6 +181,7 @@ Her står oppførselen. Utseendet står i DESIGN.md under *Components*.
 | **Godkjent etter kjøring** | Rapport og liste | Det nye datasettet blir valgt. Rapporten vises sammenfoldet (fokus: se *Fokusstyring*). Listen er sortert, og første rad er valgt. |
 | **Fil avvist** (FR-3, UJ-2) | Valideringsrapport | Overskrift og «{n} feil» etter *Faste tekster*. **Alle** feilene listes i filrekkefølge med radnummer, etter malene i *Faste tekster*. Når listen er høyere enn 320 px, scroller den inne i rapporten. Feillisten er da en fokuserbar region (`tabindex="0"`, `role="region"`, `aria-label="Feil i fila"`). Fokus: se *Fokusstyring*. Datasettvelgeren og resten av dashbordet viser fortsatt datasettet som var valgt før. **«Lukk»** fjerner avvisningen, viser den godkjente rapporten for valgt datasett igjen. En ny opplasting eller et nytt datasettvalg fjerner også avvisningen. |
 | **Kjøring feilet** (FR-7, eller tidsavbrudd) | Valideringsrapport | Samme røde variant som *Fil avvist*, med overskrift etter *Faste tekster*. Under står feilmeldingen fra backend på norsk, eller teksten for tidsavbrudd. «Lukk» virker som over. |
+| **Opplasting pågår allerede** (409) | Valideringsrapport | Samme røde variant og overskrift som *Kjøring feilet* («Prognosen kunne ikke kjøres. Ingenting er lagret.»). Under står teksten for 409 fra *Faste tekster*. Tilstanden oppstår bare hvis en opplasting fra en annen fane fortsatt kjører, fordi siden ellers er låst under kjøring. «Lukk» virker som over. |
 | **Ingen kontakt med backend** | Valideringsrapport | Rød variant med teksten fra *Faste tekster*. Fokus flyttes til teksten. Tilstanden finnes ikke i PRD-en, men følger av at frontend og backend er adskilt. |
 | **Datasett byttes** (UJ-4) | Rapport, liste, graf, tabeller, WAPE | Det kommer ikke noe slør, og datasettvelgeren kan fortsatt brukes. Rapport, liste og WAPE-linje viser `Skeleton` til dataene er kommet, og deretter velges første produkt. Panelene har `aria-busy="true"` mens de laster. |
 | **Produktdetalj lastes** | Graf og tabeller | Forrige produkt blir stående i 150 ms. Deretter vises `Skeleton` til dataene er kommet. Panelene har `aria-busy="true"` mens de laster. |
@@ -325,7 +331,7 @@ Kari, etterspørselsplanlegger, siste uka i måneden. Hun har nettopp eksportert
 ## Åpne punkter
 
 - **PRD spm. 3:** Forstår Kari «80 % prediksjonsintervall» og merknaden om scenariototalene? Svaret kan endre forklaringen i grafen («Spenn …») og plasseringen av merknaden. Spesifikasjonen unngår «80 %» i hovedteksten og bruker scenarionavnene.
-- **Addendum H6:** Disse delene trenger API-støtte som ikke finnes ennå:
+- ~~**Addendum H6:**~~ **Løst 2026-11-17** i [ARCHITECTURE-SPINE.md](../../architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md) (AD-3, AD-4, AD-8 og AD-9). Disse delene trengte API-støtte som ikke fantes:
   - WAPE-oversikten og total WAPE
   - detaljtabellen per opprinnelse, som trenger faktisk, P10, P50 og P90 per modell og opprinnelse
   - gjenvisning av valideringsrapporten

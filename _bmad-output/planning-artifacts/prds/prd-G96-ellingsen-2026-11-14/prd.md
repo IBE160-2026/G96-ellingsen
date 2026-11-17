@@ -22,7 +22,7 @@ Denne PRD-en beskriver hva PROGNOS v1 skal gjøre. Den er skrevet for gruppen, f
 
 Beslutningene i beslutningsloggen er bindende og diskuteres ikke på nytt her. Omfanget er v1 fra briefens avsnitt 4.1. Trinn 2, senere trinn og visjon nevnes bare som «utenfor v1».
 
-**Slik er dokumentet bygd opp:** Ordlista (§3) fastsetter begrepene, og resten av dokumentet bruker dem slik de er definert der. Funksjonene (§4) har globalt nummererte krav (FR-1 til FR-26). Tverrgående krav har egne ID-er (NFR-1 til NFR-9). Akseptansekriteriene F1–F14 er hentet uendret fra briefen (§8.1). Sporbarhetstabellene (§9) viser veien fra brief og tilbakemelding til krav og kriterium. Tolkninger som ikke stod i kildene, er samlet i §11. Teknologivalg står i [addendum.md](addendum.md) og i arkitekturutkastet.
+**Slik er dokumentet bygd opp:** Ordlista (§3) fastsetter begrepene, og resten av dokumentet bruker dem slik de er definert der. Funksjonene (§4) har globalt nummererte krav (FR-1 til FR-26). Tverrgående krav har egne ID-er (NFR-1 til NFR-9). Akseptansekriteriene F1–F14 er hentet uendret fra briefen (§8.1). Sporbarhetstabellene (§9) viser veien fra brief og tilbakemelding til krav og kriterium. Tolkninger som ikke stod i kildene, er samlet i §11. Teknologivalg står i [addendum.md](addendum.md) og i [arkitekturen](../../architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md), som har erstattet arkitekturutkastet.
 
 ## 1. Visjon for v1
 
@@ -604,3 +604,10 @@ Gruppen godkjente at funn med middels og lav alvorlighetsgrad skulle rettes. Dis
 - **FR-12, FR-20, FR-21** — Tekstene i grensesnittet er fastsatt ordrett, slik at de kan testes.
 - **FR-24** — Tallene for innholdet i den syntetiske CSV-fila, og grensen på 5 % mot fasiten.
 - **«ETS slår baseline»** — Betyr strengt lavere WAPE. Like verdier gir verken seier eller flagget *ETS taper*.
+
+### 11.3 Fra arkitekturen
+
+Godkjent av gruppen 2026-11-17 i arkitekturøkten:
+
+- **FR-9, FR-12, FR-14, FR-15, NFR-5** — P10, P50 og P90 rundes halvt opp til heltall rett etter nullgrensen. Scenariototaler, WAPE og intervalldekning regnes bare fra de avrundede verdiene, slik at tallene som vises, gir nøyaktig samme resultat når de regnes etter. Beslutningslogg: *Avrunding til heltall*.
+- **FR-24** — 5 %-testen mot fasiten måles på de avrundede P50-verdiene. Det støyfrie produktet har derfor et nivå på minst 20, slik at avrundingen alene ikke kan gi mer enn 2,5 % avvik.
