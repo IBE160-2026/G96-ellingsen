@@ -4,19 +4,20 @@
 - [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — gruppen må vurdere tersklene: 24 mnd minimumshistorikk, 6 mnd horisont, 65–95 % intervalldekning
 - [x] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — samkjøre `technology.md` (FastAPI/Next.js/PostgreSQL) med briefens v1-stack (Streamlit, ingen database) (løst 2026-11-14)
 - [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — vurdere om v1 rekkes i semesteret med FastAPI + Next.js (mer arbeid enn Streamlit; SQLite uten Docker fra 2026-11-14 reduserer det noe)
-- [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — flytte `arkitektur-utkast.md` inn i arkitekturdokumentet (steg 4), og velge Alembic eller `create_all` for SQLite
+- [x] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — flytte `arkitektur-utkast.md` inn i arkitekturdokumentet (steg 4), og velge Alembic eller `create_all` for SQLite (løst 2026-11-17, erstattet av ARCHITECTURE-SPINE.md, create_all valgt)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — føre SQLite-valget i beslutningsloggen i `docs/research/research-plan.md` (allerede valgt i briefen) (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — avklare hva som skjer med produkter med under 12 måneders historikk (sesongnaiv trenger 12), og oppdatere F5 i briefen (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — føre beslutningene fra research-planen inn i PRODUCT_BRIEF.md (venter på godkjenning av forslagene) (løst 2026-11-14)
 - [x] 2026-11-14 [research-plan](997-2026-11-14-18-52-02-research-plan.md) — ta med de nye reglene fra briefen (80 %-nivå, nullgrense, backtest-oppsett, CSV-validering) i arkitekturdokumentet i steg 4 (løst 2026-11-14)
 - [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — gruppen leser gjennom presiseringene i PRD §11.2 (felles siste måned, historikknivået *sesongnaiv*, historikklengde med begge endepunktene, ingen lagring hvis kjøringen feiler) (løst 2026-11-14)
-- [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — arkitekturen: datamodell og API for total WAPE, verdier per opprinnelse, endepunkt for oppsummering og lagret valideringsrapport (H6, se addendum)
-- [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — oppdatere `arkitektur-utkast.md` på de 5 punktene der det er utdatert mot beslutningsloggen
+- [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — arkitekturen: datamodell og API for total WAPE, verdier per opprinnelse, endepunkt for oppsummering og lagret valideringsrapport (H6, se addendum) (løst 2026-11-17, AD-3, AD-4, AD-8, AD-9)
+- [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — oppdatere `arkitektur-utkast.md` på de 5 punktene der det er utdatert mot beslutningsloggen (løst 2026-11-17)
 - [x] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — legge til en regel for `*.db` i `.gitignore` (NFR-9) (løst 2026-11-14)
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — åpne spørsmål i PRD §10: spike for backtest-oppsettet, ERP-eksportformater, validering av personaen
 - [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — kjøre spiken på nytt mot det ekte syntetiske datasettet (~20 produkter) når generatoren finnes. F8 feilet med seed 42 og 3 produkter (61 %), og holdt i 18 av 20 seeds
 - [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — vurdere om ETS-intervallene er for smale (dekning ned mot 50 % per produkt), siden det kan treffe F8 nedre grense på 65 %
 - [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — legge inn søk i produktlisten som nytt FR i PRD-en (tillegg fra UX) (løst 2026-11-17, FR-26)
 - [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — oppdatere UJ-1 steg 4 i PRD-en: første produkt velges nå automatisk (løst 2026-11-17)
-- [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — arkitekturen: detaljtabellen per opprinnelse trenger faktisk, P10, P50 og P90 per modell og opprinnelse (i tillegg til H6)
+- [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — arkitekturen: detaljtabellen per opprinnelse trenger faktisk, P10, P50 og P90 per modell og opprinnelse (i tillegg til H6) (løst 2026-11-17, AD-3, AD-9)
 - [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — vurdere de lave reviewfunnene i validation-report.md som ikke er tatt inn
+- [ ] 2026-11-17 [arkitektur](993-2026-11-17-20-03-02-arkitektur.md) — føre de nye feilmalene fra AD-15 (`antall_felt`, `tegnkoding`) og teksten for 409 «opplasting pågår» inn i EXPERIENCE.md
