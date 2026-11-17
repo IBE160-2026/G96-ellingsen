@@ -13,7 +13,7 @@ Det bindende arkitekturdokumentet er [ARCHITECTURE-SPINE.md](ARCHITECTURE-SPINE.
 
 ## 1. Kort om systemet
 
-PROGNOS v1 er en enbrukerapp som kjører lokalt. Brukeren, Kari, laster opp en CSV-fil med salgshistorikk. Backend validerer fila, lager en prognose for 6 måneder per produkt med ETS-modellen og en sesongnaiv referansemodell (baseline), kjører en backtest og lagrer alt i en SQLite-fil. Dashbordet viser resultatet.
+PROGNOS v1 er en enbrukerapp som kjører lokalt. Kari er personaen fra PRD-en, en etterspørselsplanlegger. Hun er ikke en ekte bruker, og personaen er ikke validert mot en planlegger ennå (PRD §10, spørsmål 3). Kari laster opp en CSV-fil med salgshistorikk. Backend validerer fila, lager en prognose for 6 måneder per produkt med ETS-modellen og en sesongnaiv referansemodell (baseline), kjører en backtest og lagrer alt i en SQLite-fil. Dashbordet viser resultatet.
 
 | Del | Teknologi |
 |---|---|
@@ -63,7 +63,7 @@ PRD-gjennomgangen fant at datamodellen og API-et i arkitekturutkastet ikke kunne
 
 | Hull | Problem | Løsning |
 |---|---|---|
-| 1. Total WAPE | Total WAPE er Σ avvik / Σ faktisk over alle produktene. Den kan ikke regnes ut fra WAPE per produkt alene. | Summene `sum_avvik` og `sum_faktisk` lagres per produkt og modell, og totalen regnes ut fra dem (AD-3, AD-4). |
+| 1. Total WAPE | Total WAPE er Σ avvik / Σ faktisk over produktene som har backtest for begge modellene og salg over 0 (se §5). Den kan ikke regnes ut fra WAPE per produkt alene. | Summene `sum_avvik` og `sum_faktisk` lagres per produkt og modell, og totalen regnes ut fra dem (AD-3, AD-4). |
 | 2. Detaljer per opprinnelse | Backtest-tabellen skal vise faktisk verdi og P10/P50/P90 for hver modell og hver av de 6 opprinnelsene. | Tabellen `backtest_punkt` lagrer én rad per produkt, modell og måned, med avvik og «i spenn» ferdig regnet ut (AD-3). |
 | 3. WAPE-oversikt | Det fantes ikke noe endepunkt for oversikten. | `GET /api/datasets/{id}` returnerer et lagret sammendrag med total WAPE, total dekning og «n av m» (AD-4, AD-9). |
 | 4. Valideringsrapport ved gjenåpning | Rapporten ble ikke lagret. | Hele rapporten lagres som JSON på datasettet og returneres uendret (AD-8). |
@@ -98,7 +98,7 @@ Utkastet er ikke slettet. Det har fått en merknad øverst om at det er erstatte
 
 | Spørsmål | Valg | Alternativet vi forkastet |
 |---|---|---|
-| Databaseskjema | `create_all` ved oppstart, med versjonsvakt. Ved skjemaendring slettes fila, og demodataene lastes inn på nytt (AD-13). | Alembic-migrasjoner. Det er mer oppsett for en enbrukerapp der dataene kan genereres på nytt. |
+| Databaseskjema | `create_all` ved oppstart, med versjonsvakt. Ved skjemaendring slettes databasefila, og demodataene lastes inn på nytt (AD-13). Datasett som brukeren selv har lastet opp, forsvinner da også og må lastes opp på nytt. For en prototype er det akseptert. | Alembic-migrasjoner, som tar vare på dataene, men gir mer oppsett. Det svarer seg ikke for en enbrukerapp der dataene kan lastes inn på nytt. |
 | Antall endepunkter | Seks, der rapport og sammendrag kommer fra samme endepunkt som datasettet, fordi de vises samtidig (AD-9). | Egne endepunkter for rapport og sammendrag, som gir flere kall som må koordineres. |
 | Typer mellom backend og frontend | Pydantic er kontrakten. zod-skjemaene speiles for hånd og sjekkes mot ekte svar i en kontrakttest (AD-9). | Kodegenerering fra OpenAPI, som gir et ekstra verktøy og byggesteg. |
 | CPU-tung modellkjøring | Kjøres i en trådpool, så `/api/health` og lesing svarer imens. Én opplasting om gangen (AD-10). | Synkron rute, som ville blandet synkrone og asynkrone databaseøkter. |
@@ -110,7 +110,7 @@ Utkastet er ikke slettet. Det har fått en merknad øverst om at det er erstatte
 Arkitekturen binder seg til konkrete versjoner og innstillinger. Disse ble sjekket mot PyPI, npm, kildekoden og egne eksperimenter 2026-11-17:
 
 - **pandas må være 2.3.x.** statsforecast 2.1.1 krever `pandas<3.0.0`, selv om pandas 3.1 er den nyeste versjonen.
-- **Next.js kutter proxyforespørsler etter 30 sekunder.** Det står i kildekoden til next@16.4.6. Opplastingen kan ta opptil 60 s (NFR-7), så `experimental.proxyTimeout` settes til 130 s (AD-11). Fordi opsjonen er eksperimentell og ikke har noen stabilitetsgaranti, er Next.js låst til nøyaktig 16.4.6. Sensor får da det samme oppsettet som gruppen har testet. Ellers ville store opplastinger feilet uten noen forklaring.
+- **Next.js kutter proxyforespørsler etter 30 sekunder.** Det står i kildekoden til next@16.4.6. Opplastingen kan ta opptil 60 s (NFR-7), så `experimental.proxyTimeout` settes til 130 s (AD-11). Uten denne innstillingen ville store opplastinger feilet uten noen forklaring. Fordi opsjonen er eksperimentell og ikke har noen stabilitetsgaranti, er Next.js låst til nøyaktig 16.4.6. Sensor får da det samme oppsettet som gruppen har testet.
 - **SeasonalNaive med nøyaktig 12 måneder** gir ikke manglende verdier, men et intervall med null bredde. Det gjelder ingen produkter som inngår i totalene (AD-5).
 - **AutoETS takler serier med bare nuller og konstante serier.** En slik serie velter altså ikke hele opplastingen.
 - **Serier med ulik lengde** kan kjøres i samme backtest-kall, og datoene blir riktige med månedsfrekvensen `MS` (AD-6).
@@ -119,7 +119,9 @@ Arkitekturen binder seg til konkrete versjoner og innstillinger. Disse ble sjekk
 
 ## 8. Kvalitetssikring av arkitekturen
 
-Spine-dokumentet ble gjennomgått av fem uavhengige KI-agenter, hver med sitt fokus:
+Arkitekturen ble laget med KI (Claude Code og skillen `bmad-architecture`). KI-en la fram alternativene med en anbefaling for hvert, og jeg tok alle valgene. De står med begrunnelse i [KI-loggen](../../../../docs/ki-logg.md), under 2026-11-17.
+
+Gjennomgangen ble også gjort av KI. Fem KI-agenter gjennomgikk spine-dokumentet hver for seg, med hvert sitt fokus:
 
 - avstemming mot PRD og addendum
 - avstemming mot UX-spesifikasjonen og beslutningsloggen
@@ -127,7 +129,7 @@ Spine-dokumentet ble gjennomgått av fem uavhengige KI-agenter, hver med sitt fo
 - verifisering av teknologi og versjoner
 - et «angrep» som prøvde å finne to utviklere som følger alle reglene, men likevel bygger noe som ikke passer sammen
 
-Funnene ble rettet før dokumentet ble satt til `final`. Rettelsene omfattet blant annet:
+Agentene fant rundt 80 funn. Før dokumentet ble satt til `final`, ble alle de kritiske og høye funnene rettet eller avkreftet, og mange av de middels ble tatt inn. Flere lave funn står bare i rapportene. Eksempler er at opplastinger over 10 MB ikke støttes, valget mellom `httpx` og `httpx2` i testene, og at shadcn sin `chart`-komponent ikke brukes. Gjennomgangen ble ikke kjørt på nytt etter rettingene. Rettelsene omfattet blant annet:
 
 - en serverfrist på 110 s, slik at «Ingenting er lagret» stemmer selv om klienten har gitt opp
 - én fast form på alle feilsvar
@@ -138,5 +140,7 @@ Ett funn som var merket kritisk, at SeasonalNaive gir manglende verdier med 12 m
 
 ## 9. Det som står åpent
 
-- **F8 kan bli for lav.** Den tekniske utprøvingen (spiken) viste at ETS-intervallene kan være smale. Spiken kjøres på nytt mot det ekte syntetiske datasettet når generatoren finnes. Intervallnivået på 80 % endres ikke (SM-C2).
+- **F7 og F8 må sjekkes på nytt.** Den tekniske utprøvingen (spiken) viste at ETS-intervallene kan være smale, så F8 kan bli for lav. Spiken brukte i tillegg urundede tall. Avrundingen til heltall (§4) endrer tallene litt, så både F7 og F8 sjekkes på nytt mot det ekte syntetiske datasettet når generatoren finnes. Intervallnivået på 80 % endres ikke (SM-C2).
+- **Dekningen er litt for lav for produkter med nøyaktig 18 måneder.** Ved første backtest-punkt har baseline bare 12 måneders trening. Intervallet får da null bredde, og punktet havner nesten alltid utenfor. Dekningen som vises for disse produktene, blir derfor noe lavere enn den egentlig er. Totalene påvirkes ikke, fordi produktene ikke inngår i dem (§7). Vi lager ingen egen regel for dette.
+- **Diagrammene er ikke maskinvalidert.** Mermaid-diagrammene i spine-dokumentet er bare sjekket for hånd, fordi mermaid-cli ikke ble kjørt i økten.
 - **Utenfor v1:** CI, sletting av datasett, flere brukere, utrulling (deploy) og alt i trinn 2 (anbefalinger, LLM og feature flags).
