@@ -16,7 +16,7 @@
 - [ ] 2026-11-14 [prd](996-2026-11-14-19-57-25-prd.md) — åpne spørsmål i PRD §10: spike for backtest-oppsettet, ERP-eksportformater, validering av personaen
 - [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — kjøre spiken på nytt mot det ekte syntetiske datasettet (~20 produkter) når generatoren finnes. F8 feilet med seed 42 og 3 produkter (61 %), og holdt i 18 av 20 seeds
 - [ ] 2026-11-14 [backtest-spike](995-2026-11-14-20-11-22-backtest-spike.md) — vurdere om ETS-intervallene er for smale (dekning ned mot 50 % per produkt), siden det kan treffe F8 nedre grense på 65 %
-- [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — legge inn søk i produktlisten som nytt FR i PRD-en (tillegg fra UX)
-- [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — oppdatere UJ-1 steg 4 i PRD-en: første produkt velges nå automatisk
+- [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — legge inn søk i produktlisten som nytt FR i PRD-en (tillegg fra UX) (løst 2026-11-17, FR-26)
+- [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — oppdatere UJ-1 steg 4 i PRD-en: første produkt velges nå automatisk (løst 2026-11-17)
 - [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — arkitekturen: detaljtabellen per opprinnelse trenger faktisk, P10, P50 og P90 per modell og opprinnelse (i tillegg til H6)
 - [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — vurdere de lave reviewfunnene i validation-report.md som ikke er tatt inn
