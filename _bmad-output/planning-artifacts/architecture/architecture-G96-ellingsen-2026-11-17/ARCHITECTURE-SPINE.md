@@ -219,6 +219,7 @@ Pilene viser hvem som kan importere hvem. `domene/` importerer ingenting fra `ap
 - **Rule:**
   - Frontend kaller bare relative `/api/*`. Backend har ingen CORS, og ingen kode leser miljøvariabler.
   - `next.config.ts` har en rewrite fra `/api/:path*` til den hardkodede adressen `http://127.0.0.1:8000/api/:path*`, og `experimental: { proxyTimeout: 130000, agentUpgrade: false }`. Klienten gir opp etter 120 s.
+  - Next.js er låst til eksakt `16.4.6`, versjonen der disse opsjonene er verifisert i kildekoden. Å bytte versjon er en ny beslutning i beslutningsloggen. Beslutningslogg: *Next.js låst til 16.4.6*.
   - Next-telemetrien slås av i `predev` og `prebuild`.
   - Bare systemfonter brukes, så importen av `next/font/google` fra create-next-app-malen fjernes. Ingen CDN.
   - `next dev` sjekker selv versjonen mot registry.npmjs.org. Det kallet feiler stille uten nett og er ikke en del av appen. NFR-1 testes med nettverket koblet fra.
@@ -314,7 +315,7 @@ Versjonene er sjekket mot PyPI og npm 2026-11-17.
 | pytest / pytest-asyncio | 9.2.x / 1.5.x |
 | httpx | 0.28.x |
 | Node.js | ≥ 22.12 |
-| Next.js (App Router) | 16.4.x |
+| Next.js (App Router) | 16.4.6, eksakt (`"next": "16.4.6"` uten `^` eller `~` i `package.json`, se AD-11) |
 | React / react-dom / react-is | 19.3.x |
 | TypeScript | 5.9.x |
 | Tailwind CSS | 4.3.x |

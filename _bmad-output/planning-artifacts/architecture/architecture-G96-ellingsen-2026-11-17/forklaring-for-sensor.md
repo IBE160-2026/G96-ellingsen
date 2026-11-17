@@ -20,7 +20,7 @@ PROGNOS v1 er en enbrukerapp som kjører lokalt. Brukeren, Kari, laster opp en C
 | Backend | Python 3.12, FastAPI, SQLAlchemy 2.1 (async) med aiosqlite |
 | Prognose | statsforecast 2.1.1 (AutoETS og SeasonalNaive). Ingen andre ML-biblioteker. |
 | Database | Én SQLite-fil i `backend/data/`. Ingen databaseserver. |
-| Frontend | Next.js 16, React 19, Tailwind v4, shadcn/ui, TanStack Query, zod, Recharts |
+| Frontend | Next.js 16.4.6 (låst eksakt, se §7), React 19, Tailwind v4, shadcn/ui, TanStack Query, zod, Recharts |
 | Kjøring | `uv run …` og `npm run dev`. Ingen Docker, ingen miljøvariabler og ingen nøkler. |
 
 Rammene for arkitekturen kom fra PRD-en, faglærers tilbakemelding (SQLite og kjøring uten nøkler) og beslutningsloggen. Beslutningsloggen er bindende, og arkitekturen diskuterer den ikke på nytt.
@@ -110,7 +110,7 @@ Utkastet er ikke slettet. Det har fått en merknad øverst om at det er erstatte
 Arkitekturen binder seg til konkrete versjoner og innstillinger. Disse ble sjekket mot PyPI, npm, kildekoden og egne eksperimenter 2026-11-17:
 
 - **pandas må være 2.3.x.** statsforecast 2.1.1 krever `pandas<3.0.0`, selv om pandas 3.1 er den nyeste versjonen.
-- **Next.js kutter proxyforespørsler etter 30 sekunder.** Det står i kildekoden til next@16.4.6. Opplastingen kan ta opptil 60 s (NFR-7), så `experimental.proxyTimeout` settes til 130 s (AD-11). Ellers ville store opplastinger feilet uten noen forklaring.
+- **Next.js kutter proxyforespørsler etter 30 sekunder.** Det står i kildekoden til next@16.4.6. Opplastingen kan ta opptil 60 s (NFR-7), så `experimental.proxyTimeout` settes til 130 s (AD-11). Fordi opsjonen er eksperimentell og ikke har noen stabilitetsgaranti, er Next.js låst til nøyaktig 16.4.6. Sensor får da det samme oppsettet som gruppen har testet. Ellers ville store opplastinger feilet uten noen forklaring.
 - **SeasonalNaive med nøyaktig 12 måneder** gir ikke manglende verdier, men et intervall med null bredde. Det gjelder ingen produkter som inngår i totalene (AD-5).
 - **AutoETS takler serier med bare nuller og konstante serier.** En slik serie velter altså ikke hele opplastingen.
 - **Serier med ulik lengde** kan kjøres i samme backtest-kall, og datoene blir riktige med månedsfrekvensen `MS` (AD-6).
