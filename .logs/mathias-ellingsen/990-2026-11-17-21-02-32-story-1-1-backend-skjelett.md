@@ -23,7 +23,10 @@ Implementere Story 1.1 med `/bmad-build`: et backend-skjelett som starter med é
   - `python -m prognos --db <sti med #>` svarte `{"status":"ok"}` og ga norsk 404.
   - Med `uvicorn prognos.main:app` ble `backend/data/prognos.db` opprettet.
   - Fila er git-ignorert.
-- Commit `0583623626279dab4200881b7001741f1886df8c` er lokal og ikke pushet. Sprint-status: `1-1` er satt til `review`, og `epic-1` til `in-progress`.
+- Commit `0583623626279dab4200881b7001741f1886df8c` inneholder koden. `epic-1` er satt til `in-progress`.
+- Mathias kjørte testene og helsesjekken selv, og alt virket. Etter det ble `1-1` satt til `done` i sprint-status.
+- Commit `8ef25b9` setter `1-1` til `done` og legger inn Story 1.1 i `docs/ki-logg.md`: hva som ble bygget, 20 funn (9 rettet og 11 avvist) og de to åpne punktene.
+- Alt er pushet til `origin/main`.
 
 ### Åpne punkter
 - Epic 3 (AD-9): `RequestValidationError` (422) og uhåndterte unntak gir fortsatt FastAPIs engelske svar. Det må håndteres når POST `/api/datasets` og `{rapport}`-formen kommer. Det var ikke nåbart i 1.1.
