@@ -98,3 +98,24 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
   - `mockups/key-dashbord.html` og `mockups/key-avvist.html`
   - `review-rubric.md`, `review-tilgjengelighet.md` og `validation-report.md`/`.html`
   - `.memlog.md`
+
+## 2026-11-17 — PRD oppdatert med endringer fra UX-økten
+
+**Økt:** Oppdaterte PRD-en med `/bmad-prd` (Claude Code), med Update-intent og lett gjennomgang. Grunnlaget var de to åpne PRD-punktene fra UX-økten.
+
+**Hva KI-en gjorde:**
+- La inn det nye kravet FR-26 *Søk i produktlisten* i §4.5, og oppdaterte UJ-1 steg 4 slik at første produkt velges automatisk.
+- La FR-26 inn i fire rader i sporbarhetstabellen §9.1, og førte de to beslutningene inn i beslutningsloggen i research-plan.md.
+- Sjekket FR-26 mot FR-19 og EXPERIENCE.md. Ingen funn.
+
+**Valg jeg tok:**
+- FR-26 får egen ID og ikke en omnummerering, slik at de eksisterende ID-ene står fast.
+- Kravet har testbare regler: «inneholder», uavhengig av store og små bokstaver, FR-19-rekkefølgen beholdes, og valgt produkt blir stående. Teller, Esc og forsinkelse blir i UX-dokumentet.
+- §0 og NFR-6 er oppdatert til FR-1 til FR-26, slik at søkekravet også dekkes av testkravet.
+
+**Forslag fra KI-en som jeg endret eller presiserte:**
+- Ingen. KI-en påpekte at «ikke endre noe annet» ville gjøre §0 og NFR-6 utdatert, og jeg valgte å oppdatere dem.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/996-2026-11-14-19-57-25-prd.md](../.logs/mathias-ellingsen/996-2026-11-14-19-57-25-prd.md)
+- [prd.md](../_bmad-output/planning-artifacts/prds/prd-G96-ellingsen-2026-11-14/prd.md) og [research-plan.md](research/research-plan.md)

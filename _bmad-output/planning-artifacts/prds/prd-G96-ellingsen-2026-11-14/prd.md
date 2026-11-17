@@ -2,7 +2,7 @@
 title: PROGNOS
 status: final
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-17
 ---
 
 # PRD: PROGNOS v1
@@ -22,7 +22,7 @@ Denne PRD-en beskriver hva PROGNOS v1 skal gjøre. Den er skrevet for gruppen, f
 
 Beslutningene i beslutningsloggen er bindende og diskuteres ikke på nytt her. Omfanget er v1 fra briefens avsnitt 4.1. Trinn 2, senere trinn og visjon nevnes bare som «utenfor v1».
 
-**Slik er dokumentet bygd opp:** Ordlista (§3) fastsetter begrepene, og resten av dokumentet bruker dem slik de er definert der. Funksjonene (§4) har globalt nummererte krav (FR-1 til FR-25). Tverrgående krav har egne ID-er (NFR-1 til NFR-9). Akseptansekriteriene F1–F14 er hentet uendret fra briefen (§8.1). Sporbarhetstabellene (§9) viser veien fra brief og tilbakemelding til krav og kriterium. Tolkninger som ikke stod i kildene, er samlet i §11. Teknologivalg står i [addendum.md](addendum.md) og i arkitekturutkastet.
+**Slik er dokumentet bygd opp:** Ordlista (§3) fastsetter begrepene, og resten av dokumentet bruker dem slik de er definert der. Funksjonene (§4) har globalt nummererte krav (FR-1 til FR-26). Tverrgående krav har egne ID-er (NFR-1 til NFR-9). Akseptansekriteriene F1–F14 er hentet uendret fra briefen (§8.1). Sporbarhetstabellene (§9) viser veien fra brief og tilbakemelding til krav og kriterium. Tolkninger som ikke stod i kildene, er samlet i §11. Teknologivalg står i [addendum.md](addendum.md) og i arkitekturutkastet.
 
 ## 1. Visjon for v1
 
@@ -56,7 +56,7 @@ Kari har akkurat eksportert oktober-salget fra ERP-systemet til `salg_2026-10.cs
 1. Hun klikker **Last opp CSV** og velger fila.
 2. Valideringsrapporten vises rett under topplinjen. Fila er godkjent med 200 produkter. 2 produkter har en advarsel om utfylte måneder, og 3 produkter har flagget *kort historikk*.
 3. Prognosen kjøres automatisk. Hun trenger ikke trykke på noe mer.
-4. Produktlisten vises med de svakeste prognosene øverst. Hun velger det første produktet og ser salgshistorikken, P50 for de neste 6 månedene og prediksjonsintervallet som et skyggelagt bånd.
+4. Produktlisten vises med de svakeste prognosene øverst, og det første produktet er valgt automatisk. Hun ser salgshistorikken, P50 for de neste 6 månedene og prediksjonsintervallet som et skyggelagt bånd. Hun kan velge et annet produkt i listen.
 5. Under grafen viser scenariotabellen scenariototalene for de 6 månedene: Pessimistisk 820, Forventet 960 og Optimistisk 1110, med P10/P50/P90 som forklaring.
 
 **Klimaks:** Hun har et tall hun kan gi videre til MRP, og et spenn hun kan bruke i samtalen om sikkerhetsmargin med materialplanleggeren. Selve vurderingen gjør hun selv, for PROGNOS v1 regner ikke ut sikkerhetslager.
@@ -354,6 +354,19 @@ Systemet viser produktene i valgt datasett sortert slik at de svakeste prognosen
 - Hvert produkt med flagget *kort historikk* eller *ETS taper* viser flagget i produktlisten.
 - Når Kari velger et produkt, oppdateres graf, scenariotabell og backtest-tabell.
 
+#### FR-26: Søk i produktlisten
+
+Kari kan filtrere produktlisten på `produkt_id` med et søkefelt. Sorteringen fra FR-19 beholdes. Realiserer UJ-1 og UJ-3. Beslutningslogg: *Søk i produktlisten*.
+
+**Konsekvenser (testbare):**
+- Treffene er produktene der `produkt_id` inneholder søketeksten, uavhengig av store og små bokstaver.
+- Treffene står i samme rekkefølge som i FR-19.
+- Et tomt søkefelt viser alle produktene.
+- Valgt produkt blir stående i graf og tabeller, også når det faller utenfor filteret.
+
+**Utenfor omfang:**
+- Søk på andre felt enn `produkt_id`.
+
 #### FR-20: Graf per produkt
 
 Systemet viser en graf for valgt produkt med salgshistorikk, P50 og prediksjonsintervallet P10–P90 som et skyggelagt bånd. Realiserer UJ-1. Verifiseres av **F10**.
@@ -419,7 +432,7 @@ Når backend starter og databasen er tom, lastes den syntetiske CSV-fila inn og 
 | **NFR-3** | **Varig lagring.** Data overlever omstart av backend. Kravet står i FR-6. Denne raden finnes for sporbarheten til F11. | Se FR-6. | F11 |
 | **NFR-4** | **Norsk.** Grensesnitt, feilmeldinger, valideringsrapport og dokumentasjon er på norsk. Beslutningslogg: *Språk*. | Ingen engelske brukertekster i dashbordet, bortsett fra fagbegrepene i ordlista (§3). Playwright-testen sjekker overskriftene og scenarionavnene. | — |
 | **NFR-5** | **Etterprøvbarhet.** Scenariototaler, WAPE og intervalldekning kan regnes etter for hånd fra tallene som vises (FR-21). | Et lite testdatasett med håndregnet fasit for scenariototaler, WAPE og intervalldekning ligger sammen med testene, og testene sjekker mot den. | F6, F7, F8 |
-| **NFR-6** | **Testdekning.** F1–F14 er dekket av automatiske tester som kjører grønt, og F10 testes med Playwright. I tillegg har hver testbare konsekvens i FR-1 til FR-25 minst ett automatisk testtilfelle. | Testkjøringen er grønn. | F1–F14 |
+| **NFR-6** | **Testdekning.** F1–F14 er dekket av automatiske tester som kjører grønt, og F10 testes med Playwright. I tillegg har hver testbare konsekvens i FR-1 til FR-26 minst ett automatisk testtilfelle. | Testkjøringen er grønn. | F1–F14 |
 | **NFR-7** | **Svartid.** Opplasting av et datasett på Karis størrelse (200 produkter × 36 måneder) gir valideringsrapport, prognose og backtest innen 60 sekunder. | Tidtaking i en test med en generert fil av denne størrelsen, kjørt etter én oppvarmingskjøring på utviklerens PC. Maskinens spesifikasjon står i README. | — |
 | **NFR-8** | **Enbrukerapp.** Ingen innlogging, roller eller samtidige brukere. | Ingen API-endepunkter krever autentisering, og dashbordet har ingen innloggingsside. | — |
 | **NFR-9** | **Ryddig repo.** Generatoren og den syntetiske CSV-fila med fasit ligger i en egen mappe for testdata. Databasefila ligger i en fast mappe som er ignorert i git. Repoet inneholder ingen hemmeligheter. `.env.example` finnes og forklarer at v1 ikke trenger miljøvariabler. | `git ls-files` lister ingen `.db`- eller `.env`-filer. | — |
@@ -509,22 +522,22 @@ Ved lesing av kriteriene gjelder dette: F3 og F6 omfatter produkter med historik
 | §2 Målgruppe, behov «prognose uten regneark» | Last opp CSV → prognose for alle produkter | FR-1, FR-7, FR-8, UJ-1 | F1, F3 |
 | §2 Målgruppe, behov «vite hvor sikker» | P10/P50/P90 og tre scenarioer | FR-9, FR-11, FR-12, UJ-1 | F2, F6 |
 | §2 Målgruppe, behov «stole på metoden» | Backtest med WAPE mot sesongnaiv baseline | FR-13–FR-17, UJ-3 | F7, F8 |
-| §2 Målgruppe, behov «oversikt raskt» | Dashbord med historikk, prognose og intervall | FR-18–FR-22, UJ-1 | F10 |
+| §2 Målgruppe, behov «oversikt raskt» | Dashbord med historikk, prognose og intervall | FR-18–FR-22, FR-26, UJ-1 | F10 |
 | §2 Arbeidsflyt steg 1–2 | Eksport, opplasting, validering, lagring, automatisk prognose | FR-1–FR-7, UJ-1, UJ-2, UJ-4 | F4, F5, F11, F13, F14 |
-| §2 Arbeidsflyt steg 3 | Produktliste med de svakeste øverst, flagg, graf og scenarioer | FR-5, FR-11, FR-12, FR-17, FR-19–FR-21, UJ-1 | F5, F6, F10 |
+| §2 Arbeidsflyt steg 3 | Produktliste med de svakeste øverst, flagg, graf og scenarioer | FR-5, FR-11, FR-12, FR-17, FR-19–FR-21, FR-26, UJ-1 | F5, F6, F10 |
 | §2 Arbeidsflyt steg 4 | Sjekk backtest mot baseline | FR-13–FR-17, FR-21, FR-22, UJ-3 | F7, F8 |
 | §2 Ikke-brukere, målvirksomhet | Én primærbruker, enbrukerapp | §2.2, NFR-8 | — |
 | §2 Hva skiller PROGNOS | Prototype som viser et prinsipp | §1 (tesen), §6 | — |
 | §3 Produktmål 1 | CSV → prognose med P10/P50/P90 og scenarioer | FR-1–FR-12 | F1–F6, F11, F13, F14 |
 | §3 Produktmål 2 | Treffsikkerhet med backtest (WAPE) | FR-13–FR-17, SM-1, SM-2 | F7, F8 |
-| §3 Produktmål 3 | Oversiktlig dashbord | FR-18–FR-22 | F10 |
+| §3 Produktmål 3 | Oversiktlig dashbord | FR-18–FR-22, FR-26 | F10 |
 | §3 Læringsmål og forretningsmål | KI i produktet og i utviklingen. Forretningsmål hører til visjonen | §8.3 | — |
 | §4 Omfangstabell | v1, trinn 2, senere trinn, visjon | §7 | — |
 | §4.1 del 1 CSV-import | Kolonner, skilletegn, validering, utfylling, historikknivå, lagring, automatisk kjøring | FR-1–FR-7, UJ-4 | F4, F5, F11, F13, F14 |
 | §4.1 del 2 Én modell mot baseline | ETS, sesongnaiv, 6 mnd, 80 % intervall, nullgrense | FR-8–FR-10 | F1, F2, F3, F5 |
 | §4.1 del 3 Tre scenarioer | Scenarioer, scenariototal med merknad, scenarionavn som hovedord | FR-11, FR-12, FR-21 | F6, F10 |
 | §4.1 del 4 Backtest | 6 opprinnelser, 1 måned frem, WAPE, dekning, 30-månedersgrense, *ETS taper* | FR-13–FR-17 | F7, F8 |
-| §4.1 del 5 Dashbord | Én side, produktliste, graf, tabeller, WAPE-oversikt | FR-18–FR-22 | F10 |
+| §4.1 del 5 Dashbord | Én side, produktliste med søk, graf, tabeller, WAPE-oversikt | FR-18–FR-22, FR-26 | F10 |
 | §4.1 Syntetiske testdata | Fast seed, trend/sesong/støy, alle historikknivåer, innlasting ved oppstart | FR-23–FR-25, NFR-9 | F7, F8, F9 |
 | §4.2 Trinn 2, §4.3 Senere trinn, §4.4 Visjon | — | §7.2 (utenfor v1) | — |
 | §4.5 Utenfor omfang uansett | MRP, automatiske beslutninger m.m. | §6 | — |
