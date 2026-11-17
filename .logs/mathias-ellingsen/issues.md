@@ -21,3 +21,5 @@
 - [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — arkitekturen: detaljtabellen per opprinnelse trenger faktisk, P10, P50 og P90 per modell og opprinnelse (i tillegg til H6) (løst 2026-11-17, AD-3, AD-9)
 - [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — vurdere de lave reviewfunnene i validation-report.md som ikke er tatt inn
 - [x] 2026-11-17 [arkitektur](993-2026-11-17-20-03-02-arkitektur.md) — føre de nye feilmalene fra AD-15 (`antall_felt`, `tegnkoding`) og teksten for 409 «opplasting pågår» inn i EXPERIENCE.md (løst 2026-11-17)
+- [ ] 2026-11-17 [epics-og-stories](992-2026-11-17-20-40-46-epics-og-stories.md) — kjøre `bmad-sprint-planning` (sjekke at implementeringen er klar og lage sprint-statusfila)
+- [ ] 2026-11-17 [epics-og-stories](992-2026-11-17-20-40-46-epics-og-stories.md) — finne en konstruert serie der ETS taper mot baseline gjennom de ekte modellene (`backend/tests/data/ets_taper.csv`, Story 5.3), som Epic 6 trenger
