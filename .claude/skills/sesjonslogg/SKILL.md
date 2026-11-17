@@ -1,6 +1,6 @@
 ---
 name: sesjonslogg
-description: Dokumenterer arbeidssesjonen i `.logs/` i prosjektroten (Oppgave + Plan + Resultat + åpne punkter) og vedlikeholder åpne punkter i `issues.md`, slik at sluttoppsummeringer og «husk at»-punkter ikke forsvinner i chat-scrollback. Bruk denne ved slutten av ENHVER arbeidsøkt eller fullført oppgave som endret tilstand — også små mekaniske økter som en commit, push, publisering eller konfig-endring — alltid før du skriver sluttoppsummeringen til brukeren, og særlig når oppsummeringen inneholder «åpne punkter», «gjenstår», «husk at», «legg merke til», «neste steg», «ikke gjort» eller lignende. Bruk den også når brukeren sier «logg sesjonen», «logg dette», «oppdater loggen», «skriv sesjonslogg», og når du trenger å vite hva som ble gjort i en tidligere sesjon (les da `.logs/` og `issues.md` i stedet for å gjette).
+description: Dokumenterer arbeidssesjonen i `.logs/` i prosjektroten (Oppgave + Plan + Resultat + åpne punkter) og vedlikeholder åpne punkter i `issues.md`, slik at sluttoppsummeringer og «husk at»-punkter ikke forsvinner i chat-scrollback. Bruk denne ved slutten av ENHVER arbeidsøkt eller fullført oppgave som endret tilstand — også små mekaniske økter som en publisering eller konfig-endring (men ikke økter som bare består av egne git-operasjoner som commit, push, pull eller merge) — alltid før du skriver sluttoppsummeringen til brukeren, og særlig når oppsummeringen inneholder «åpne punkter», «gjenstår», «husk at», «legg merke til», «neste steg», «ikke gjort» eller lignende. Bruk den også når brukeren sier «logg sesjonen», «logg dette», «oppdater loggen», «skriv sesjonslogg», og når du trenger å vite hva som ble gjort i en tidligere sesjon (les da `.logs/` og `issues.md` i stedet for å gjette).
 ---
 
 # Sesjonslogg
@@ -12,9 +12,11 @@ Formål: brukeren leser ikke alltid sluttoppsummeringen i terminalen, og den for
 - Finn prosjektroten med `git rev-parse --show-toplevel` (i et git-worktree: worktreets egen rot). Loggmappen er `<rot>/.logs/<bruker-slug>/` — én mappe per bruker, slik at hver bruker ser sine egne økter adskilt. Slugen er kebab-case av `git config user.name` (f.eks. `bard-pettersen`; mangler navnet, bruk local-part av `user.email`). Opprett mappen hvis den mangler.
 - Skriv loggen når en oppgave/økt avsluttes, **før** du skriver sluttoppsummeringen til brukeren — da er alt ferskt, og oppsummeringen kan gjenbruke teksten. I lange økter: oppdater gjerne loggen underveis ved milepæler.
 - Rene småspørsmål-økter (ett faktasvar, ingenting endret, ingenting å huske) trenger ikke logg. Alt annet logges.
-- Testen for «trenger ikke logg» er **om økten endret tilstand** — ikke hvor liten oppgaven føltes. En commit, push, publisering, migrasjon, seeding eller konfig-endring er tilstandsendring og skal logges selv om den bare tok to kommandoer: det er nettopp de små mekaniske øktene som glemmes først, og loggen er eneste sted et fremtidig «når ble dette pushet, og hva lå i det?» kan besvares. To følgeregler:
+- Testen for «trenger ikke logg» er **om økten endret tilstand** — ikke hvor liten oppgaven føltes. En publisering, migrasjon, seeding eller konfig-endring er tilstandsendring og skal logges selv om den bare tok to kommandoer: det er nettopp de små mekaniske øktene som glemmes først. To følgeregler:
   - En økt som *starter* som et spørsmål («er X à jour?») men *ender* i en handling («commit og push det») er ikke lenger en spørsmålsøkt.
   - Inneholder sluttoppsummeringen din et «merk at …»/«husk …»/«gjenstår …»-punkt, har du allerede bevist at økten har noe å miste i scrollback — da logges den, uansett størrelse.
+
+- **Egne git-operasjoner logges ikke.** Commit, push, pull, merge, rebase, brancher og git-konfig er sporet i git selv. En økt som *bare* består av slike operasjoner trenger ingen logg. I logger for annet arbeid skal git-operasjoner heller ikke nevnes: ingen linjer som «committet og pushet til `origin/main`», «X er ikke committet» eller «merget inn i `main`», og ingen «committe og pushe» i Oppgave eller Plan. Commit-hasher kan stå som referanse til arbeidet (f.eks. «koden ligger i `0583623`»), men ikke som egen statuslinje. Skillens egen loggcommit (under) gjøres fortsatt.
 
 ## Ny fil eller fortsettelse?
 
@@ -42,7 +44,7 @@ Hva brukeren ba om, med intensjonen bak — 1–3 setninger.
   skrevet til fil), lenk til det her — brukeren skal kunne spore nøyaktig hva planen var.
 
 ### Resultat
-Hva som ble gjort: endrede filer/områder, commits (hash hvis committet), migrasjoner,
+Hva som ble gjort: endrede filer/områder, migrasjoner,
 testresultater, hva som ble verifisert. Konkret nok til at en fremtidig sesjon kan
 bygge videre uten å gjette.
 
@@ -74,7 +76,7 @@ git commit -m "Logg: <tittel>" -- ".logs/<bruker-slug>/<fil>.md" ".logs/<bruker-
 
 ## Hva er (ikke) et åpent punkt?
 
-Et åpent punkt er noe som gjenstår i selve produktet eller prosjektet: en manglende test, en kjent bug, konfig som må settes ved deploy, en beslutning som venter, noe brukeren eksplisitt ba deg huske. Git- og prosesstatus er **ikke** åpne punkter — brukeren ser git-status selv, og slike punkter drukner de ekte. (I Resultat-seksjonen kan commit-hash eller «ukommittert» nevnes kort som faktum.) Eksempler på ting som IKKE skal inn i Åpne punkter eller `issues.md`:
+Et åpent punkt er noe som gjenstår i selve produktet eller prosjektet: en manglende test, en kjent bug, konfig som må settes ved deploy, en beslutning som venter, noe brukeren eksplisitt ba deg huske. Git- og prosesstatus er **ikke** åpne punkter — brukeren ser git-status selv, og slike punkter drukner de ekte. (Egne git-operasjoner logges heller ikke i Resultat, se over.) Eksempler på ting som IKKE skal inn i Åpne punkter eller `issues.md`:
 
 - «Ingen av endringene er committet — husk å committe.» / «må pushes»
 - Samordningsbeskjeder om repo-tilstand: «NN må `git pull` / re-synke klonene sine»

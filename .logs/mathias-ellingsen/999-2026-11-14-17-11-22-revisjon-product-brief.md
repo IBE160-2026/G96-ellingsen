@@ -3,19 +3,16 @@
 ## 2026-11-14 kl. 17:11 — Mathias Ellingsen
 
 ### Oppgave
-Revidere `PRODUCT_BRIEF.md` etter tilbakemelding om at omfanget var for stort: velge én primærbruker, bytte forretningsmål ut med testbare funksjonelle kriterier og avgrense v1 til en tydelig kjerneflyt, med resten flyttet til senere trinn og en visjon. Deretter committe, pushe og merge til `main`.
+Revidere `PRODUCT_BRIEF.md` etter tilbakemelding om at omfanget var for stort: velge én primærbruker, bytte forretningsmål ut med testbare funksjonelle kriterier og avgrense v1 til en tydelig kjerneflyt, med resten flyttet til senere trinn og en visjon.
 
 ### Plan
 - Tre runder med omskriving av briefen, én per tilbakemelding.
-- Commit på grenen `revider-product-brief`, push, og deretter merge inn i `main`.
 
 ### Resultat
 - `PRODUCT_BRIEF.md` er skrevet om:
   - Primærbruker er etterspørselsplanleggeren (persona «Kari»).
   - Nytt avsnitt 4 Omfang: v1 (CSV-import, ETS mot sesongnaiv baseline, tre scenarioer P10/P50/P90, backtest med WAPE, Streamlit-dashbord, syntetiske testdata), trinn 2 (produksjon vs. lager med sikkerhetslager = Σ(P90 − P50) over ledetiden, valgfri LLM-forklaring med mock-modus), senere trinn, visjon og det som er utenfor omfang uansett.
   - Suksesskriterier F1–F10 (v1) og B1–B3, L1 (trinn 2).
-- Commit `6da487f` på `revider-product-brief`. `origin/main` hadde fått 4 nye commits fra Bård (tilbakemelding, sesjonslogg-skill, `technology.md`), og disse ble merget inn uten konflikt. Merge-commit `8aacd59` er pushet til `main`.
-- Git-identitet er satt lokalt i repoet (`user.name`/`user.email`), siden den manglet.
 
 ### Åpne punkter
 - Det syntetiske testdatasettet og generatoren finnes ikke ennå. Det trengs før F7–F9 kan testes.
@@ -29,7 +26,7 @@ Samkjøre briefen med Bårds `technology.md`: v1 skal bruke FastAPI, Next.js og 
 
 ### Plan
 - Lese `technology.md` og ta med bare de delene v1 trenger.
-- Oppdatere avsnitt 4 og 5 og suksesskriteriene i `PRODUCT_BRIEF.md`, og committe.
+- Oppdatere avsnitt 4 og 5 og suksesskriteriene i `PRODUCT_BRIEF.md`.
 
 ### Resultat
 - Avsnitt 5 i `PRODUCT_BRIEF.md` er skrevet om:
@@ -39,7 +36,7 @@ Samkjøre briefen med Bårds `technology.md`: v1 skal bruke FastAPI, Next.js og 
   - En liste over hva fra `technology.md` som ikke er med i v1: innlogging, betaling, e-post, Supabase, Redis, Caddy, Railway og backup.
 - Avsnitt 4.1 sier nå at datasett lagres i databasen og at testdata seedes ved oppstart.
 - F10 testes nå med Playwright i stedet for Streamlit `AppTest`. Nye kriterier: F11 (lagring i PostgreSQL) og F12 (`docker compose up` uten hemmeligheter).
-- Commit `08a5cda`, pushet til `origin/main`. Punktet om samkjøring med `technology.md` i `issues.md` er lukket.
+- Punktet om samkjøring med `technology.md` i `issues.md` er lukket.
 
 ### Åpne punkter
 - Den nye stacken gir mer arbeid i v1 enn Streamlit-løsningen (to språk, database, migrasjoner, Docker). Gruppen bør vurdere om v1 fortsatt rekkes i semesteret.
@@ -60,7 +57,6 @@ Fire endringer i `PRODUCT_BRIEF.md`: bytte til SQLite, slik at sensor ikke treng
   - Avsnitt 5: en kort innledning som begrunner SQLite i stedet for PostgreSQL fra `technology.md`, arkitekturskissen med SQLite, og prinsippene (null konfigurasjon nå også uten Docker). Tabellene for komponenter, API og datamodell og listen «med / ikke med» er fjernet.
   - F11 gjelder nå SQLite. F12 krever at appen starter med README-kommandoene uten Docker eller nøkler, at databasefila opprettes automatisk, og at `/api/health` svarer OK.
 - Ny fil `.docs/planning-artifacts/architecture/arkitektur-utkast.md` med komponenttabell (SQLite + `aiosqlite`), API, datamodell og med/ikke med/avvik fra `technology.md`.
-- Endringene er ikke committet.
 
 ### Åpne punkter
 - Innholdet i `arkitektur-utkast.md` skal inn i arkitekturdokumentet i steg 4. Der må vi også velge mellom Alembic og `create_all` for SQLite.
