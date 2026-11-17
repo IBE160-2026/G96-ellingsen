@@ -20,4 +20,4 @@
 - [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — oppdatere UJ-1 steg 4 i PRD-en: første produkt velges nå automatisk (løst 2026-11-17)
 - [x] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — arkitekturen: detaljtabellen per opprinnelse trenger faktisk, P10, P50 og P90 per modell og opprinnelse (i tillegg til H6) (løst 2026-11-17, AD-3, AD-9)
 - [ ] 2026-11-14 [ux-spesifikasjon](994-2026-11-14-21-07-06-ux-spesifikasjon.md) — vurdere de lave reviewfunnene i validation-report.md som ikke er tatt inn
-- [ ] 2026-11-17 [arkitektur](993-2026-11-17-20-03-02-arkitektur.md) — føre de nye feilmalene fra AD-15 (`antall_felt`, `tegnkoding`) og teksten for 409 «opplasting pågår» inn i EXPERIENCE.md
+- [x] 2026-11-17 [arkitektur](993-2026-11-17-20-03-02-arkitektur.md) — føre de nye feilmalene fra AD-15 (`antall_felt`, `tegnkoding`) og teksten for 409 «opplasting pågår» inn i EXPERIENCE.md (løst 2026-11-17)
