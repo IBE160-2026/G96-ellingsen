@@ -161,3 +161,49 @@ Logg over hvordan KI er brukt i prosjektet, og hvilke valg gruppen har tatt selv
 
 **Kilder:**
 - [ARCHITECTURE-SPINE.md](../_bmad-output/planning-artifacts/architecture/architecture-G96-ellingsen-2026-11-17/ARCHITECTURE-SPINE.md), [forklaring-for-sensor.md](../_bmad-output/planning-artifacts/architecture/architecture-G96-ellingsen-2026-11-17/forklaring-for-sensor.md) og `reviews/` i samme mappe
+
+## 2026-11-17 — Epics og stories for PROGNOS v1
+
+**Økt:** Laget epics og stories med `/bmad-create-epics-and-stories` (Claude Code). Grunnlaget var PRD med addendum, ARCHITECTURE-SPINE.md og UX-spesifikasjonen (DESIGN.md og EXPERIENCE.md). Arbeidet gikk i fire steg: kravuttrekk, epic-struktur, stories én epic om gangen og sluttvalidering. Jeg godkjente hvert steg og hver epic.
+
+**Hva KI-en gjorde:**
+- Hentet ut 26 FR, 9 NFR, AD-1 til AD-15 med konvensjonene, og 30 UX-designkrav (UX-DR1–UX-DR30) som egne krav.
+- Foreslo seks epics i rekkefølgen jeg ga:
+  1. prosjektskjelett og helsesjekk
+  2. syntetisk datasett med seed 42
+  3. CSV-import, validering og lagring
+  4. prognose og scenarioer
+  5. backtest
+  6. dashbord
+- Skrev 30 stories: Epic 1 (3), Epic 2 (2), Epic 3 (7), Epic 4 (3), Epic 5 (5) og Epic 6 (8).
+- Hver story har feltene **Dekker** (FR, F, AD og eventuelt NFR og UX-DR) og **Tester i storyen**, i tillegg til akseptansekriterier på formen Given/When/Then. Testene skrives i samme story som koden.
+- Hver tabell opprettes i den første storyen som trenger den, med ny `SKJEMAVERSJON` hver gang.
+- Kjørte en maskinell dekningskontroll av alle FR, NFR, F, AD og UX-DR, og en sjekk av alle henvisningene mellom storyene.
+
+**Valg jeg tok:**
+- UX-DR-ene beholdes som egne krav for sporbarhet, men samles i stories etter skjermdel (topplinje, produktliste, graf, tabeller, WAPE-oversikt og tilgjengelighet), med hver UX-DR som akseptansekriterium. Det blir ikke én story per UX-DR.
+- FR-7, FR-19, FR-22 og FR-24 deles over flere epics. Hver story som dekker en del av et slikt krav, sier hvilken del det er (*delvis: …*), og storyen som gjør kravet ferdig, er merket **(fullfører)**:
+  - FR-7 (automatisk kjøring): Epic 3 → 4 → 5
+  - FR-19 (rekkefølgen i produktlisten): Epic 3 → 5 → 6
+  - FR-22 (WAPE-oversikten): Epic 5 → 6
+  - FR-24 (innholdet i det syntetiske datasettet): Epic 2 → 4
+- Godkjente at FR-19 også får en del i Epic 3. API-kontrakten krever `rang` fra første versjon, og uten WAPE er regelen enkel: flaggede produkter først, deretter etter `produkt_id`.
+- Låste rekkefølgen i Epic 6 tidlig, fordi Epic 4 viser til storyen der merknaden om scenariototaler vises.
+
+**Forslag fra KI-en som jeg endret eller presiserte:**
+- **Story 3.4 delt.** KI-en hadde lagt lagring, lås og serverfrist i samme story. Jeg ba om at 409 (låsen) og serverfristen ble skilt ut i en egen story, som nå er 3.5. Storyene etter den fikk nytt nummer, og henvisningen i Story 1.3 ble rettet.
+- **Story 6.2 delt.** Jeg ba om at de røde rapportvariantene (feilet kjøring, 409, tidsavbrudd og ingen kontakt) ble skilt ut i en egen story, som nå er 6.3. Storyene etter den fikk nytt nummer, og henvisningene i Epic 4 (merknaden fra FR-12) og Epic 5 (NFR-1) ble rettet.
+- **NFR-1 rettet.** KI-en merket først NFR-1 som fullført i Story 5.5. Kravet om at UJ-1 fungerer uten nett trenger dashbordet, så kontrollen ble flyttet til den siste storyen i Epic 6.
+
+**Funn fra sluttvalideringen som ble rettet:**
+1. **Seedingen og låsen.** Story 3.5 krevde at seedingen tok samme lås, men seedingen lages først i 3.7. Kriteriet og testen er flyttet til 3.7.
+2. **Antall endepunkter.** Story 5.4 snakket om «fem» lese-endepunkter, men det finnes fire. Teksten er rettet.
+3. **Lastetilstand ved bytte av datasett.** Story 6.2 krevde `Skeleton` i produktlisten og WAPE-linjen, som først lages i senere stories. Kravet er fordelt på storyene for rapporten (6.2), produktlisten (6.4) og WAPE-oversikten (6.7).
+4. **Produktvalg og graf.** Testen for produktlisten forutsatte at graf og tabeller fantes. Story 6.4 tester nå at valget endres og at produktdetaljen hentes. Story 6.6 fullfører FR-19 og FR-26 med testen om at graf og tabeller oppdateres.
+5. **Testdata for *ETS taper*.** Testene i Epic 6 forutsatte at det syntetiske datasettet har et produkt der ETS taper. Det er ikke garantert, og dataene skal ikke justeres for det (SM-C1). Story 5.3 lagrer nå en konstruert fil, `backend/tests/data/ets_taper.csv`, og testene i Epic 6 laster opp den.
+
+Etter rettingene ble kontrollen kjørt på nytt. Alt var dekket, ingen story avhenger av en senere story, og epics.md ble satt til final.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/992-2026-11-17-20-40-46-epics-og-stories.md](../.logs/mathias-ellingsen/992-2026-11-17-20-40-46-epics-og-stories.md)
+- [epics.md](../_bmad-output/planning-artifacts/epics.md)
