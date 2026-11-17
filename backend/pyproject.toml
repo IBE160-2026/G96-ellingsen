@@ -1,0 +1,32 @@
+[project]
+name = "prognos"
+version = "0.1.0"
+description = "PROGNOS backend: salgsprognoser for småbedrifter"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "aiosqlite>=0.22,<0.23",
+    "fastapi>=0.163,<0.164",
+    "numpy>=2.5,<2.6",
+    "pandas==2.3.3",
+    "pydantic>=2.14,<2.15",
+    "python-multipart>=0.0.34,<0.0.35",
+    "sqlalchemy[asyncio]>=2.1,<2.2",
+    "statsforecast==2.1.1",
+    "uvicorn>=0.54,<0.55",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.8,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28,<0.29",
+    "pytest>=9.2,<9.3",
+    "pytest-asyncio>=1.5,<1.6",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

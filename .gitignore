@@ -62,3 +62,7 @@ Thumbs.db
 
 # Lokal SQLite-database (NFR-9)
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/data/*.db
