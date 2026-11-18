@@ -229,3 +229,43 @@ Etter rettingene ble kontrollen kjørt på nytt. Alt var dekket, ingen story avh
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md](../.logs/mathias-ellingsen/990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md)
 - [Spesifikasjon for Story 1.1](../_bmad-output/implementation-artifacts/spec-1-1-backend-skjelett-med-automatisk-database-og-helsesjekk.md)
+
+## 2026-11-18 — Story 1.2: Frontend-skjelett med proxy til backend
+
+**Økt:** Implementerte Story 1.2 med `/bmad-build` (Claude Code). Arbeidet fortsatte fra en spesifikasjon jeg godkjente 2026-11-17. En subagent implementerte, KI-en kontrollerte diffen mot spesifikasjonen, og tre uavhengige reviewere gikk gjennom koden. Etterpå sjekket jeg proxyen og testene selv.
+
+**Hva som ble bygget:**
+- `frontend/` med Next 16.4.6 (App Router, TypeScript, Tailwind v4) og `shadcn init`. Bare systemfonter, `lang="nb"` og en norsk plassholder med ordmerket «PROGNOS».
+- `next.config.ts` sender `/api/*` videre til `http://127.0.0.1:8000` og har `proxyTimeout: 130000` og `agentUpgrade: false` (AD-11). Frontend kaller bare relative `/api/*`, og ingen kode leser `process.env`.
+- 15 Vitest-tester for oppsettet: eksakt next-versjon, `~`-låsing av de andre pakkene, rewrite, at Playwright aldri gjenbruker en kjørende server, og at appkoden er fri for Google-fonter, `process.env` og eksterne URL-er.
+- 4 Playwright-tester mot ekte backend på en midlertidig databasefil (AD-14): helse gjennom proxyen, at backendens 404 sendes uendret videre, forsiden, og at utviklerens `backend/data/prognos.db` ikke røres.
+
+**Rettet før review (KI-ens egen kontroll):**
+- `next dev` lagde `frontend/AGENTS.md` på nytt hver gang den oppdaget en KI-agent, selv om malfilene skulle slettes. Det er slått av med `agentRules: false`.
+- Kanttilfellet «port 8000 opptatt» hadde ingen test. Det er nå testet, og også prøvd i praksis: Playwright stopper med «already used».
+- 404-testen sjekket bare formen på svaret. Nå sammenligner den proxy-svaret byte for byte med backendens.
+
+**Gjennomgang:** Reviewerne ga 20 funn.
+- **Rettet (6):**
+  - `cacheComponents` og `partialPrefetching` var lagt til i `next.config.ts` uten bestilling. Malen har tom konfig. Begge er fjernet, fordi de endrer renderingsmodellen Epic 6 arver.
+  - Kontrollen av at utviklerdatabasen ikke røres brukte `git status`, som aldri kan slå ut fordi `*.db` er gitignored. Den er erstattet med en e2e-test som sammenligner tidsstempler.
+  - Playwright starter frontend med `--port 3000`, så `next dev` ikke flytter seg til 3001 i stillhet.
+  - Skanningen etter forbudte strenger dekker nå alle filer og rotkonfigene.
+  - En test sjekker `~`-låsingen.
+  - 404-testen sammenligner også `content-type`.
+- **Avvist (13):** De var feil, var allerede dekket, var bestemt i spesifikasjonen eller var lite sannsynlige med en dyr fiks. Eksempler: `localhost` mot `::1` (testene nådde `localhost:3000`), `button.tsx` (output fra `shadcn init`, som spesifikasjonen ber om) og at gamle temp-databaser blir liggende (godtatt i Design Notes).
+- **Utsatt (1):** se åpne punkter.
+
+Hele triagen står i spesifikasjonen.
+
+**Åpne punkter:**
+- `npm test` feiler med «Cannot read properties of undefined (reading 'config')» når arbeidsmappa har liten stasjonsbokstav (`c:\…`). Feilen ligger i Vitest/Vite, ikke i koden vår. Rundgangene er testet:
+  - PowerShell virker alltid, og det er standardterminalen i VS Code.
+  - cmd virker med `cd /d C:\…`.
+  - Git Bash virker med `cd /C/…`.
+
+  Story 1.3 skal beskrive dette i README. En fiks i skriptet finnes, men den er ikke enkel. Punktet er også ført i `deferred-work.md`.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md](../.logs/mathias-ellingsen/988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md)
+- [Spesifikasjon for Story 1.2](../_bmad-output/implementation-artifacts/spec-1-2-frontend-skjelett-med-proxy-til-backend.md)
