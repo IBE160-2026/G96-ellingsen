@@ -13,7 +13,7 @@
 - Les statsforecast-dokumentasjon: AutoETS, SeasonalNaive, cross_validation
 - WAPE: definisjon og hvorfor den brukes i stedet for MAPE
 - ~~Testskript (spike): slår ETS baseline? Blir P10 negativ? Hvor god er P10–P90-dekningen?~~ **Besvart 2026-11-14:** ETS slår baseline i 18 av 20 seeds, P10 ble ikke negativ med seed 42, og P10–P90-dekningen for ETS var i snitt 76,7 % (innenfor 65–95 % i 18 av 20). Se [teknisk.md](teknisk.md).
-- Syntetiske data: hvordan lage serier slik at F7 og F8 holder?
+- ~~Syntetiske data: hvordan lage serier slik at F7 og F8 holder?~~ **Besvart 2026-11-18:** Med generatoren fra Story 2.1 (seed 42) holder begge. Total WAPE er 0,106 for ETS mot 0,140 for sesongnaiv (F7), og ETS-dekningen er 80,8 % (F8). Se [teknisk.md](teknisk.md), *Spike på nytt mot det syntetiske datasettet*.
 
 ## Brukerbehov
 - Hvordan ser en CSV-eksport fra ERP ut? (semikolon, desimalkomma, datoformat, manglende måneder)
