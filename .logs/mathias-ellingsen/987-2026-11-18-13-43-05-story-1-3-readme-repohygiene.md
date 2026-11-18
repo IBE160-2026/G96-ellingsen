@@ -17,9 +17,9 @@ Gjennomføre Story 1.3 med `bmad-build`. README skal fortelle sensor hva som må
 - Tester: `uv run pytest` ga 32 grønne, og `npm test` fra PowerShell ga 15/15.
 - **Oppstartskontroll med nett, 2026-11-18, utviklerens PC** (Windows 11 Home, Node 26.13.1, uv 0.13.8): Jeg flyttet den gamle `backend/data/` til side og startet etter README. `prognos.db` ble opprettet. `GET /api/health` ga `{"status":"ok"}` både gjennom `localhost:3000` og direkte på 8000.
 - Review: 12 funn. 3 ble rettet: `.db`-endelser, `.env.*.example` og installasjonslenker. 1 ble utsatt (offline-kontrollen), og 8 ble avvist. Detaljene står i Review Triage Log i speccen.
-- Sprint-status: Story 1.3 står på `review`. Koden ligger i `f07911e`.
-- Punktet om liten stasjonsbokstav fra Story 1.2 er lukket i `issues.md`.
+- **Oppstartskontroll uten nett (F12, NFR-1), 2026-11-18, utviklerens PC** (Windows 11 Home, antatt samme maskin som kontrollen med nett). Mathias gjorde den selv med nettverket koblet fra etter installasjonen: backend og frontend startet etter README, helsesjekken svarte OK gjennom proxyen, siden viste «PROGNOS», og alle testene var grønne (32 i backend, 15 i frontend).
+- Sprint-status: Story 1.3 er gått gjennom og står på `done`. Koden ligger i `f07911e`.
+- Punktet om liten stasjonsbokstav fra Story 1.2 er lukket i `issues.md`. Offline-punktet og review-punktet for Story 1.3 er også lukket, og offline-punktet er markert som løst i `deferred-work.md`.
 
 ### Åpne punkter
-- Den manuelle offline-kontrollen (F12, NFR-1) gjenstår: koble fra nettverket etter installasjonen, start backend og frontend etter README, og sjekk `/api/health` gjennom frontend. Før resultatet i loggen med dato og maskin.
-- Gå gjennom Story 1.3 (står på `review`), og sett den til `done` i sprint-status.
+Ingen.
