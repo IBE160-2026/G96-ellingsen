@@ -33,4 +33,4 @@
   - **Git Bash feiler** med `cd /c/…`, men virker med `cd /C/…`.
   - `vitest run --root C:\…` hjelper ikke. `vitest.config.ts` kan heller ikke fikse det, fordi feilen kommer før konfigen gjelder.
   - **Fiks i skriptet finnes, men er ikke enkel:** et inline Node-skript som gjør `process.chdir(fs.realpathSync.native('.'))` og importerer `vitest.mjs` med absolutt sti, gir 15/15 fra cmd med `c:\…`. Det er prøvd som direkte `node -e`-kommando, ikke som `npm test`-skript. Vurder et lite `scripts/test.mjs` før det eventuelt erstatter `vitest run`.
-- [ ] 2026-11-18 [story-1-2-frontend-skjelett](988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md) — gå gjennom Story 1.2 (står på `review`) og sett den til `done` i sprint-status
+- [x] 2026-11-18 [story-1-2-frontend-skjelett](988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md) — gå gjennom Story 1.2 (står på `review`) og sett den til `done` i sprint-status (løst 2026-11-18)

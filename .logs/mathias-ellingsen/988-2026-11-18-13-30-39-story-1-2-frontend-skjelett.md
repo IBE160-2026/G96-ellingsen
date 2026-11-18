@@ -26,7 +26,8 @@ Fortsette Story 1.2 fra i går med `bmad-build`. Utgangspunktet var sprint-statu
 - 13 reviewfunn er avvist, med begrunnelse i speccens Review Triage Log.
 - Rad 4 er også prøvd i praksis: med en annen prosess på port 8000 stopper Playwright med «already used», og `backend/data/prognos.db` er urørt.
 - Verifisert: Vitest 15/15, `tsc --noEmit` er grønn, `npm run build` lykkes, og Playwright 4/4. `backend/data/prognos.db` har uendret mtime.
-- Speccen er `done`, og sprint-status er `review`. Koden ligger i `97aa02e`.
+- Speccen er `done`. Koden ligger i `97aa02e`.
+- Mathias sjekket proxyen og testene selv, og Story 1.2 er satt til `done` i sprint-status. Innførselen i `docs/ki-logg.md` dekker det som ble bygget, alle 20 reviewfunn (6 rettet, 13 avvist, 1 utsatt) og den utsatte feilen med liten stasjonsbokstav (`3d32048`).
 
 ### Åpne punkter
 - `npm test` i `frontend/` feiler når arbeidsmappa har liten stasjonsbokstav (`c:\…`). Story 1.3 skal ta det i README. Rundgangene er testet:
@@ -35,4 +36,3 @@ Fortsette Story 1.2 fra i går med `bmad-build`. Utgangspunktet var sprint-statu
   - Git Bash virker med `cd /C/…`.
 
   En fiks i skriptet med `process.chdir(fs.realpathSync.native('.'))` virker, men er ikke enkel. Detaljene står i `issues.md`, og punktet er også ført i `deferred-work.md`.
-- Story 1.2 står på `review` i sprint-status. Den må settes til `done` etter menneskelig gjennomgang, for eksempel med `bmad-walkthrough`.
