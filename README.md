@@ -28,7 +28,7 @@ uv installeres etter oppskriften på <https://docs.astral.sh/uv/getting-started/
 Bruk **PowerShell**, som er standardterminalen i VS Code. `npm test` (Vitest) feiler med «Cannot read properties of undefined (reading 'config')» når arbeidsmappa har liten stasjonsbokstav (`c:\…`). Feilen ligger i Vitest/Vite. PowerShell skriver stasjonsbokstaven om til `C:` og er ikke rammet. Testede rundganger i andre terminaler:
 
 - **cmd:** gå til mappa med stor bokstav, `cd /d C:\…\frontend`.
-- **Git Bash:** bruk stor bokstav i stien, `cd /C/…/frontend` (ikke `/c/…`).
+- **Git Bash:** `cd /c/…/frontend` kan feile, avhengig av hvordan terminalen startes. Bruk stor bokstav i stien, `cd /C/…/frontend`.
 
 ### Installasjon
 
