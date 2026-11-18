@@ -325,3 +325,37 @@ Jeg la også inn at `bmad-build` alltid bruker subagenter til å kompilere konte
 **Kilder:**
 - [Retro-dokument](../_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md)
 - Sesjonslogg: [.logs/mathias-ellingsen/986-2026-11-18-13-53-50-retro-epic-1.md](../.logs/mathias-ellingsen/986-2026-11-18-13-53-50-retro-epic-1.md)
+
+## 2026-11-18 — Story 2.1: Generator for syntetisk salgshistorikk med fasit
+
+**Økt:** Bygget Story 2.1 med `/bmad-build` (Claude Code). KI-en kompilerte konteksten for Epic 2 med en subagent og skrev speccen. Etter at jeg godkjente den, implementerte en subagent, og tre uavhengige reviewere gikk gjennom diffen.
+
+**Hva KI-en gjorde:**
+- Skrev `testdata/generator.py`. Den bruker bare standardbiblioteket og numpy, har `--seed` (standard 42) og `--mappe`, og skriver `testdata/syntetisk.csv` og `testdata/fasit.json`.
+- Modellen er `(nivå + trend·t) · sesongfaktor + støy`. Svaret klemmes til ≥ 0 og rundes til heltall.
+- Parameterne trekkes fra faste intervaller per kategori og settes aldri produkt for produkt (SM-C1).
+- Laget 21 pytest-tester i `backend/tests/testdata/`. Hver av dem er sett feile med en endring i generatoren før den ble regnet som bevis (R2).
+
+**Valg jeg tok:**
+- Produktene heter `P-101` til `P-124`, samme format som i PRD-en og mockupene.
+  - P-101–P-115 har trend.
+  - P-116–P-117 er flate med mye støy.
+  - P-118–P-120 har sesong uten trend.
+  - P-121–P-124 har 8, 15, 20 og 26 måneders historikk.
+- Beholdt speccen samlet, selv om den var litt over den anbefalte lengden.
+- Sjekket testene og generatoren selv før storyen ble satt til `done`.
+
+**Hva gjennomgangen fanget:** 15 funn, og 5 ble rettet.
+- **Det viktigste funnet:** ingen test sjekket at tallene i CSV-en faktisk følger trend, sesong og støy i fasiten. Hadde sesongen havnet i feil måned, ville alle testene likevel vært grønne. Nå regner en egen test modellen tilbake fra fasiten.
+- **Sammensetningen ble ikke sjekket:** antallet sesongprodukter, flate produkter uten sesong og korte produkter med trend.
+- **Avvist (10):** usannsynlige feilsituasjoner, som negativ seed, `python -OO` og dynamiske importer.
+
+Hele triagen står i spesifikasjonen.
+
+**Resultat:** 53 tester grønne i PowerShell. En ny kjøring av generatoren gir byte-identiske filer. Den globale regelen `* text=auto eol=lf` i `.gitattributes` er kontrollert: Git lagrer og sjekker ut testdatafilene uendret, også med `core.autocrlf=true`. De egne `-text`-reglene kommer i Story 2.2.
+
+**Åpne punkter:** Kjøre backtest-spiken på nytt mot det syntetiske datasettet (fra retroen for Epic 1).
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/984-2026-11-18-14-19-29-story-2-1-generator-syntetisk.md](../.logs/mathias-ellingsen/984-2026-11-18-14-19-29-story-2-1-generator-syntetisk.md)
+- [Spesifikasjon for Story 2.1](../_bmad-output/implementation-artifacts/spec-2-1-generator-for-syntetisk-salgshistorikk-med-fasit.md)
