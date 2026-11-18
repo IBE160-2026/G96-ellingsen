@@ -24,6 +24,7 @@ Kjøre `bmad-project-context` og få reglene fra CLAUDE.md, også R1–R3, inn i
 - Utelatt fordi tester allerede håndhever det: at `domene/` er ren, at `next` er låst til 16.4.6, `~`-låsing og `agentRules: false`.
 - To kandidater ble prøvd og forkastet, fordi `npm test` fra Git Bash med `/c/…` og ren `pytest` begge virket her.
 - `uv run pytest tests/test_repo.py`: 13/13 grønne.
+- README sier nå om Git Bash at `cd /c/…/frontend` kan feile, avhengig av hvordan terminalen startes, og anbefaler fortsatt `/C/…`. Det lukker punktet i `issues.md`. AGENTS.md, CLAUDE.md og README ligger i `eb8aeb7`.
 
 ### Åpne punkter
-- README sier at `npm test` feiler i Git Bash med `cd /c/…`, men den gikk grønt (15/15) fra Claude Codes Bash-verktøy 2026-11-18. Finn ut om merknaden fortsatt stemmer, eller om den avhenger av hvordan terminalen startes.
+Ingen.
