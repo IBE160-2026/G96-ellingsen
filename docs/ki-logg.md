@@ -269,3 +269,35 @@ Hele triagen står i spesifikasjonen.
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md](../.logs/mathias-ellingsen/988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md)
 - [Spesifikasjon for Story 1.2](../_bmad-output/implementation-artifacts/spec-1-2-frontend-skjelett-med-proxy-til-backend.md)
+
+## 2026-11-18 — Story 1.3: README, repohygiene og kontroll av oppstarten
+
+**Økt:** Implementerte Story 1.3 med `/bmad-build` (Claude Code). Endringen var liten og hadde ingen åpne spørsmål, så KI-en valgte den korte ruten: spesifikasjon, implementering, én uavhengig reviewer og triage i samme økt. På forhånd bestemte jeg hvordan feilen i Vitest ved liten stasjonsbokstav fra Story 1.2 skulle håndteres: ingen fiks i et eget skript, bare en merknad i README.
+
+**Hva som ble bygget:**
+- `README.md` på norsk. Den har forutsetningene med versjoner (Python 3.12, uv 0.13.x, Node.js ≥ 22.12) og lenker for å installere dem, og installasjon med `uv sync --frozen`, `npm ci` og `npx playwright install chromium`. Den har også start av backend og frontend og alle tre testkommandoene. Den sier at v1 ikke trenger Docker, miljøvariabler, nøkler eller betalte tjenester, og at bare installasjonen trenger nett.
+- En merknad om terminal på Windows: PowerShell anbefales, og rundgangene for cmd (`cd /d C:\…`) og Git Bash (`cd /C/…`) er med.
+- `.env.example`, som sier at v1 ikke trenger miljøvariabler (NFR-9).
+- `backend/tests/test_repo.py`. Den sjekker at kommandoene og versjonene står ordrett i README, at `.env.example` finnes, og at `git ls-files` ikke viser `.db`-, `.db-wal`-, `.sqlite`- eller `.env`-filer.
+
+**Rettet før review (KI-ens egen kontroll):** I første utkast havnet teksten til `.env.example` i `README.md` ved en feil. KI-en oppdaget det selv og rettet det før testene ble kjørt.
+
+**Gjennomgang:** Revieweren ga 12 funn.
+- **Rettet (3):**
+  - Testen for databasefiler fanger nå også `-journal`, `-wal`, `-shm` og `.sqlite`, slik `.gitignore` gjør.
+  - Testen for `.env` godtar `.env.*.example`, som `.gitignore` tillater.
+  - README har lenker for å installere uv og Node, siden sensor skal klare seg uten hjelp.
+- **Avvist (8):** De var feil, rammet sjelden, eller lå utenfor storyen. Eksempler: at testen feiler uten git (testen hoppes over når `.git` mangler) og at `engines` mangler i `package.json`.
+- **Utsatt (1):** kontrollen uten nett, som jeg måtte gjøre selv.
+
+Hele triagen står i spesifikasjonen.
+
+**Kontroll av oppstarten (F12, NFR-1):**
+- **Med nett:** KI-en flyttet den gamle databasefila til side og startet etter README. `prognos.db` ble laget på nytt, og helsesjekken svarte OK både gjennom frontend og direkte mot backend.
+- **Uten nett:** Jeg koblet fra nettverket etter installasjonen. Backend og frontend startet, helsesjekken svarte OK gjennom proxyen, siden viste «PROGNOS», og alle testene var grønne (32 i backend og 15 i frontend).
+
+**Åpne punkter:** Ingen. Epic 1 har nå alle tre stories på `done`.
+
+**Kilder:**
+- Sesjonslogg: [.logs/mathias-ellingsen/987-2026-11-18-13-43-05-story-1-3-readme-repohygiene.md](../.logs/mathias-ellingsen/987-2026-11-18-13-43-05-story-1-3-readme-repohygiene.md)
+- [Spesifikasjon for Story 1.3](../_bmad-output/implementation-artifacts/spec-1-3-readme-repohygiene-og-kontroll-av-oppstarten.md)
