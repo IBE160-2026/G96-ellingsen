@@ -30,5 +30,12 @@ Bygge Story 2.1 med `bmad-build`. Målet er en generator med seed 42 som skriver
   - 10 ble avvist med begrunnelse. Triageloggen står i speccen.
 - **Status:** speccen er `done`, og Story 2.1 står på `review` i sprint-status.
 
+- **Brukeren har gått gjennom testene og generatoren.** Story 2.1 er satt til `done` i sprint-status, og det er lagt til en innførsel i `docs/ki-logg.md`. Koden ligger i commit `d9c59b5`.
+- **`.gitattributes` er kontrollert.** Den globale regelen `* text=auto eol=lf` holder testdatafilene uendret både ved innsjekking og utsjekking:
+  - **Innsjekking:** det lagrede blobet er identisk med den rå fila, selv om maskinen har `core.autocrlf=true`.
+  - **Utsjekking:** en fersk klone med `core.autocrlf=true` er byte-lik og har 0 CR-bytes.
+  - **Motprøve:** med regelen fjernet fra både disk og indeks får klonen CRLF i hver linje (790 og 510 CR-bytes). Det er altså regelen som beskytter filene.
+  - De egne `-text`-reglene kommer fortsatt i Story 2.2.
+
 ### Åpne punkter
-- Gå gjennom Story 2.1 og sett den til `done` i sprint-status. Legg da til en innførsel i `docs/ki-logg.md`.
+Ingen.
