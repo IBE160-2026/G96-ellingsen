@@ -1,6 +1,6 @@
 # Åpne punkter
 
-- [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — lage generator og syntetisk testdatasett med kjent trend og sesong (trengs for F7–F9)
+- [x] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — lage generator og syntetisk testdatasett med kjent trend og sesong (trengs for F7–F9) (løst 2026-11-18: Story 2.1, `testdata/generator.py`)
 - [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — gruppen må vurdere tersklene: 24 mnd minimumshistorikk, 6 mnd horisont, 65–95 % intervalldekning
 - [x] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — samkjøre `technology.md` (FastAPI/Next.js/PostgreSQL) med briefens v1-stack (Streamlit, ingen database) (løst 2026-11-14)
 - [ ] 2026-11-14 [revisjon-product-brief](999-2026-11-14-17-11-22-revisjon-product-brief.md) — vurdere om v1 rekkes i semesteret med FastAPI + Next.js (mer arbeid enn Streamlit; SQLite uten Docker fra 2026-11-14 reduserer det noe)
@@ -39,3 +39,4 @@
 - [x] 2026-11-18 [retro-epic-1](986-2026-11-18-13-53-50-retro-epic-1.md) — rette Verification-delen i spec-1-2: bytt `git status --short backend/data` (kan aldri feile) med `npx playwright test` (`e2e/database.spec.ts`) (løst 2026-11-18)
 - [x] 2026-11-18 [retro-epic-1](986-2026-11-18-13-53-50-retro-epic-1.md) — avgjøre om R1–R3 fra retroen (ingen innstillinger uten bestilling, testen må ha vært rød, kommandoer verifisert i PowerShell) skal inn i `CLAUDE.md`/`AGENTS.md` (løst 2026-11-18: lagt inn i `CLAUDE.md`)
 - [x] 2026-11-18 [agents-md-prosjektkontekst](985-2026-11-18-14-03-44-agents-md-prosjektkontekst.md) — README sier at `npm test` feiler i Git Bash med `cd /c/…`, men den gikk grønt fra Claude Codes Bash-verktøy. Finn ut om merknaden fortsatt stemmer (løst 2026-11-18: README sier nå «kan feile, avhengig av hvordan terminalen startes»)
+- [ ] 2026-11-18 [story-2-1-generator-syntetisk](984-2026-11-18-14-19-29-story-2-1-generator-syntetisk.md) — gå gjennom Story 2.1 (står på `review`), sett den til `done` i sprint-status og legg til en innførsel i `docs/ki-logg.md`
