@@ -301,3 +301,27 @@ Hele triagen står i spesifikasjonen.
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/987-2026-11-18-13-43-05-story-1-3-readme-repohygiene.md](../.logs/mathias-ellingsen/987-2026-11-18-13-43-05-story-1-3-readme-repohygiene.md)
 - [Spesifikasjon for Story 1.3](../_bmad-output/implementation-artifacts/spec-1-3-readme-repohygiene-og-kontroll-av-oppstarten.md)
+
+## 2026-11-18 — Retrospektiv for Epic 1
+
+**Økt:** Kjørte `/bmad-retrospective` (Claude Code) på Epic 1. Jeg ba om en kort retro med vekt på hva gjennomgangene fanget som KI-en ellers ville gått videre med, og hvilke regler vi tar med videre. KI-en leste triage-loggene i speccene, sesjonsloggene og git-historikken, og kjørte alle testene på nytt.
+
+**Hva gjennomgangene fanget:** De tre storyene fikk 52 reviewfunn til sammen, og 18 ble rettet. Tre typer feil gikk igjen:
+- **Innstillinger ingen ba om:** KI-en la `cacheComponents` og `partialPrefetching` inn i `next.config.ts`, men malen har tom konfig. I tillegg skrev `next dev` `AGENTS.md` på nytt av seg selv.
+- **En test som aldri kunne feile:** at utviklerdatabasen ikke ble rørt, ble sjekket med `git status`, men `*.db` er gitignored. Den ble erstattet av `e2e/database.spec.ts`. Flere andre tester var smalere enn kravet de skulle sjekke.
+- **Liten stasjonsbokstav:** `npm test` feiler fra `c:\…`. README forklarer nå hvordan man kommer rundt det.
+
+Retroen fant også at Verification-delen i speccen for Story 1.2 fortsatt anbefalte `git status`-sjekken. Det er rettet.
+
+**Resultat:** Dommen er *accepted-with-open-items*. Alle akseptkriteriene er oppfylt, og testene er grønne: pytest 32/32, Vitest 15/15 og Playwright 4/4. Epic 1 står på `done`. Jeg bestemte at tre regler skal gjelde videre, og de står nå i `CLAUDE.md`:
+- **R1:** ingen innstillinger uten bestilling.
+- **R2:** en test teller først når den er sett feile.
+- **R3:** kommandoer verifiseres i PowerShell.
+
+Jeg la også inn at `bmad-build` alltid bruker subagenter til å kompilere konteksten og til uavhengig kodegjennomgang.
+
+**Åpne punkter:** Kjøre backtest-spiken på nytt når generatoren i Epic 2 finnes.
+
+**Kilder:**
+- [Retro-dokument](../_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md)
+- Sesjonslogg: [.logs/mathias-ellingsen/986-2026-11-18-13-53-50-retro-epic-1.md](../.logs/mathias-ellingsen/986-2026-11-18-13-53-50-retro-epic-1.md)

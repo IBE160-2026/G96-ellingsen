@@ -29,17 +29,17 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-17-2026 20:44
-last_updated: 11-18-2026 13:49
+last_updated: 11-18-2026 13:55
 project: G96-ellingsen
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-backend-skjelett-med-automatisk-database-og-helsesjekk: done
   1-2-frontend-skjelett-med-proxy-til-backend: done
   1-3-readme-repohygiene-og-kontroll-av-oppstarten: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-generator-for-syntetisk-salgshistorikk-med-fasit: backlog
@@ -80,3 +80,38 @@ development_status:
   6-7-wape-oversikt-for-alle-produkter: backlog
   6-8-tilgjengelighet-responsiv-layout-og-hele-arbeidsflyten: backlog
   epic-6-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-r1-ingen-innstillinger-uten-bestilling-h"
+    epic: 1
+    action: "R1: ingen innstillinger uten bestilling - hver ny konfig-/avhengighetslinje
+      skal kunne vises til i spec eller verktoyets mal"
+    owner: "Mathias"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md"
+  - id: "epic-1-retro-item-2-bytt-git-status-sjekken-i-verification-i"
+    epic: 1
+    action: "Bytt git status-sjekken i Verification i spec-1-2 med npx playwright
+      test (e2e/database.spec.ts)"
+    owner: "Mathias"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md"
+  - id: "epic-1-retro-item-3-r2-hver-akseptkriterietest-skal-ha-vaert"
+    epic: 1
+    action: "R2: hver akseptkriterietest skal ha vaert rod for den regnes som bevis;
+      fasittester i Epic 2 mot uavhengige konstanter"
+    owner: "Mathias"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md"
+  - id: "epic-1-retro-item-4-r3-nye-kommandoer-i-spec-readme-verifise"
+    epic: 1
+    action: "R3: nye kommandoer i spec/README verifiseres i PowerShell for done"
+    owner: "Mathias"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md"
+  - id: "epic-1-retro-item-5-kjor-backtest-spiken-pa-nytt-mot-det-syn"
+    epic: 1
+    action: "Kjor backtest-spiken pa nytt mot det syntetiske datasettet nar generatoren
+      i Epic 2 finnes"
+    owner: "Mathias"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-11-18.md"

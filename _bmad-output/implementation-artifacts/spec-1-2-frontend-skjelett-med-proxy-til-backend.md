@@ -107,4 +107,4 @@ Den midlertidige databasestien regnes ut i `playwright.config.ts` med `os.tmpdir
 - `cd frontend && npm test` -- expected: grønt
 - `cd frontend && npx playwright install chromium && npx playwright test` -- expected: grønt
 - `cd frontend && npm run build` -- expected: bygget lykkes
-- `git status --short backend/data` -- expected: ingen endring etter Playwright
+- `cd frontend && npx playwright test e2e/database.spec.ts` -- expected: grønt (beviser at `backend/data/prognos.db` ikke røres; `git status` kan ikke vise det, fordi `*.db` er gitignored)
