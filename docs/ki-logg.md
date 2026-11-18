@@ -359,3 +359,31 @@ Hele triagen står i spesifikasjonen.
 **Kilder:**
 - Sesjonslogg: [.logs/mathias-ellingsen/984-2026-11-18-14-19-29-story-2-1-generator-syntetisk.md](../.logs/mathias-ellingsen/984-2026-11-18-14-19-29-story-2-1-generator-syntetisk.md)
 - [Spesifikasjon for Story 2.1](../_bmad-output/implementation-artifacts/spec-2-1-generator-for-syntetisk-salgshistorikk-med-fasit.md)
+
+## 2026-11-18 — Retrotiltak 5: backtest-spiken på nytt mot det syntetiske datasettet
+
+**Økt:** Kjørte backtest-spiken på nytt mot `testdata/syntetisk.csv` med Claude Code. Dette er tiltak 5 fra retroen for Epic 1.
+
+**Hva KI-en gjorde:**
+- La til `--csv` i `spikes/backtest_spike.py`. Den gamle spike-modusen er beholdt, så seksjonen fra 2026-11-14 kan fortsatt kjøres på nytt.
+- Fulgte oppsettet i beslutningsloggen:
+  - 6 opprinnelser, horisont 1 og 80 % intervall.
+  - ETS for 30+ mnd, bare baseline for 18–29 mnd og ingen backtest under 18 mnd.
+  - Nullgrense og avrunding halvt opp til heltall før WAPE og dekning.
+  - Totaler bare over produkter med backtest for begge modellene.
+- Sjekket at F7 og F8 kan slå ut (R2). En kopi der hver serie er de første 12 månedene gjentatt, fikk begge til å feile. Kopien lå bare i en midlertidig mappe.
+
+**Valg jeg tok:** Datasettet, seeden, generatoren og intervallnivået ble ikke rørt (SM-C1).
+
+**Resultat:**
+- **F7 holder:** total WAPE er 0,106 for ETS og 0,140 for sesongnaiv, over 20 produkter.
+- **F8 holder:** ETS-dekningen er 80,8 % (97 av 120).
+- ETS taper for 6 av 20 produkter.
+- Mistanken fra 2026-11-14 om for smale ETS-intervaller bekreftes ikke.
+- Ført inn i [teknisk.md](research/teknisk.md). Retrotiltaket er lukket i `sprint-status.yaml`.
+
+**Åpne punkter:** Ingen.
+
+**Kilder:**
+- [teknisk.md: Spike på nytt mot det syntetiske datasettet](research/teknisk.md)
+- Sesjonslogg: [.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md](../.logs/mathias-ellingsen/995-2026-11-14-20-11-22-backtest-spike.md)

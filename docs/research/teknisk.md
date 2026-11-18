@@ -51,3 +51,51 @@ ETS-dekningen var i snitt 76,7 % og lå mellom 61,1 % og 100 %. ETS hadde lavere
 - **ETS-intervallene kan være for smale.** Med seed 42 hadde to av tre produkter 50 % dekning, men snittet over 20 seeds (76,7 %) ligger nær det nominelle nivået på 80 %. Spiken gir ikke grunn til å endre intervallnivået, men det bør sjekkes på det virkelige datasettet.
 - **Observasjon:** for P1 ved opprinnelsen 2025-07 er ETS-prognosen lik siste faktiske verdi. AutoETS valgte trolig en modell uten sesong ved den opprinnelsen. Modellvalget kan altså variere mellom opprinnelsene.
 - **Seed:** spiken kan ikke brukes til å velge seed for det virkelige datasettet. Seeden er låst til 42 i beslutningsloggen (*Seed for syntetisk datasett*), og F7 og F8 må sjekkes på nytt når datasettet er generert.
+
+## Spike på nytt mot det syntetiske datasettet (2026-11-18)
+
+Retrotiltak 5 fra Epic 1. Spiken fra 2026-11-14 brukte et forenklet spike-datasett. Her kjøres den mot det ekte syntetiske datasettet fra Story 2.1 (`testdata/syntetisk.csv`, seed 42), med hele oppsettet fra beslutningsloggen. Datasettet, seeden, generatoren og intervallnivået er ikke endret (SM-C1).
+
+```powershell
+uv run spikes/backtest_spike.py --csv testdata/syntetisk.csv
+```
+
+### Oppsett
+
+- **Data:** 24 produkter og 789 rader. 20 produkter har 36 måneder, og P-121–P-124 har 8, 15, 20 og 26 måneder. Alle seriene ender i 2026-10.
+- **Hvilke produkter får backtest** (*Backtest*, *Backtest for 12–17 mnd*): de 20 produktene med 30+ mnd får ETS og sesongnaiv. P-123 og P-124 (18–29 mnd) får bare sesongnaiv. P-121 og P-122 (under 18 mnd) får ingen backtest.
+- **Backtest:** som før, `cross_validation(h=1, n_windows=6, step_size=1, level=[80])`, med kontrollen av FR-13 per produkt.
+- **Nullgrense og avrunding** (*Avrunding til heltall*, AD-5): P10, P50 og P90 settes først til minst 0, og rundes så halvt opp til heltall. WAPE og dekning regnes bare fra de avrundede verdiene.
+- **Totaler** (*Total WAPE*, *Intervalldekning og sortering*, *WAPE når faktisk salg er 0*): total WAPE og dekning regnes for begge modellene over de samme 20 produktene med backtest for begge modellene. Produkter med faktisk sum 0 i backtestmånedene ville vært holdt utenfor, men ingen produkter har det.
+- **Versjoner:** statsforecast 2.1.1, pandas 2.3.3, numpy 2.5.5, Python 3.12.
+
+### Resultat
+
+| | ETS | Sesongnaiv |
+|---|---|---|
+| Total WAPE (20 produkter) | **0,106** | 0,140 |
+| Total P10–P90-dekning (120 prognoser) | **80,8 %** (97/120) | 85,0 % (102/120) |
+
+- **F7 holder:** ETS har lavere total WAPE (0,106) enn sesongnaiv (0,140).
+- **F8 holder:** ETS-dekningen er 80,8 %, godt innenfor 65–95 %. Grensene ligger 19 treff under og 17 treff over.
+- **ETS taper** mot sesongnaiv for 6 av 20 produkter: P-104, P-107, P-109, P-113, P-115 og P-119.
+- De flate produktene med mye støy har høyest WAPE: P-116 med 0,360 og P-117 med 0,457 for ETS.
+- **Bare baseline:** P-123 har WAPE 0,209 og dekning 33,3 %. P-124 har WAPE 0,151 og dekning 50,0 %.
+- **Negative P10 før nullgrensen:** 0 for ETS og 2 for sesongnaiv. Nullgrensen ble altså brukt.
+
+Utskriften per produkt får du ved å kjøre kommandoen over.
+
+### Kan sjekkene slå ut? (R2)
+
+Spiken er også kjørt på kopier av datasettet som er brukket med vilje. Kopiene ligger bare i en midlertidig mappe og er ikke sjekket inn.
+
+- **Hver serie er de første 12 månedene gjentatt** (perfekt sesong uten støy): F7 holder ikke, fordi begge modellene får WAPE 0,000. F8 holder ikke, fordi dekningen blir 100 %. Begge sjekkene kan altså slå ut.
+- **Månedene er stokket innenfor hver serie:** F7 og F8 holder fortsatt. Sesongnaiv blir enda dårligere på ren støy.
+- **De siste 6 månedene er ganget med 3:** F8 holder så vidt, med 65,8 %.
+
+### Vurdering
+
+- **Begge kriteriene holder på datasettet som skal brukes,** uten justering. Det xfail-merket i beslutningsloggen trenges trolig ikke i Story 5.4. Dette gjelder hvis kjernen regner likt med spiken.
+- **Dekningen havner nær det nominelle nivået på 80 %.** Med 120 prognoser er standardavviket omtrent 3,7 prosentpoeng, slik spiken fra 2026-11-14 forutså. Mistanken om for smale ETS-intervaller fra den gangen bekreftes ikke på dette datasettet.
+- **6 av 20 produkter får flagget *ETS taper*.** Flagget og visningen av begge WAPE-tallene i Epic 5 og 6 får dermed ekte tilfeller å testes mot.
+- **Resultatet er ikke en fasit for kjernen.** Story 5.1–5.4 skal regne ut WAPE og dekning selv. Fasittestene der skal sammenligne med uavhengige konstanter (R2), ikke med tallene fra denne spiken.
