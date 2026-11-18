@@ -29,5 +29,10 @@ Fortsette Story 1.2 fra i går med `bmad-build`. Utgangspunktet var sprint-statu
 - Speccen er `done`, og sprint-status er `review`. Koden ligger i `97aa02e`.
 
 ### Åpne punkter
-- `npm test` i `frontend/` feiler når arbeidsmappa har liten stasjonsbokstav (`c:\…`, typisk i cmd og VS Code-terminalen), men er grønn med `C:\…`. Feilen ligger i Vitest/Vite. Den er ført i `deferred-work.md`, og README i Story 1.3 bør nevne den.
+- `npm test` i `frontend/` feiler når arbeidsmappa har liten stasjonsbokstav (`c:\…`). Story 1.3 skal ta det i README. Rundgangene er testet:
+  - PowerShell virker alltid, og det er standardterminalen i VS Code.
+  - cmd virker med `cd /d C:\…`.
+  - Git Bash virker med `cd /C/…`.
+
+  En fiks i skriptet med `process.chdir(fs.realpathSync.native('.'))` virker, men er ikke enkel. Detaljene står i `issues.md`, og punktet er også ført i `deferred-work.md`.
 - Story 1.2 står på `review` i sprint-status. Den må settes til `done` etter menneskelig gjennomgang, for eksempel med `bmad-walkthrough`.

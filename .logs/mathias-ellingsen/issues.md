@@ -27,5 +27,10 @@
 - [ ] 2026-11-17 [sprint-planning](991-2026-11-17-20-44-55-sprint-planning.md) — `sprint_plan.py generate` lager story-nøklene med æ/ø/å igjen, og ASCII-nøklene i sprint-status.yaml blir droppet ved en ny kjøring. Sett dem på nytt for hånd, eller la `_slug` translitterere
 - [ ] 2026-11-17 [story-1-1-backend-skjelett](990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md) — Epic 3: legg til norske håndterere for `RequestValidationError` (422) og uhåndterte unntak (AD-9, `{rapport}` på POST, `{detail}` på GET)
 - [ ] 2026-11-17 [story-1-1-backend-skjelett](990-2026-11-17-21-02-32-story-1-1-backend-skjelett.md) — `fastapi 0.163.2` i `uv.lock` ble publisert samme dag; følg med på om det kommer en rask patch
-- [ ] 2026-11-18 [story-1-2-frontend-skjelett](988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md) — `npm test` i `frontend/` feiler når arbeidsmappa har liten stasjonsbokstav (`c:\…`, cmd og VS Code). Feilen ligger i Vitest/Vite. Nevn det i README (Story 1.3), eller normaliser `root` i `vitest.config.ts`
+- [ ] 2026-11-18 [story-1-2-frontend-skjelett](988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md) — **Story 1.3 skal håndtere dette i README:** `npm test` i `frontend/` feiler med «Cannot read properties of undefined (reading 'config')» når arbeidsmappa har liten stasjonsbokstav (`c:\…`). Feilen ligger i Vitest/Vite. Testet 2026-11-18:
+  - **PowerShell virker alltid** (15/15), også når den startes fra `c:\…`, fordi den skriver stasjonsbokstaven om til `C:`. PowerShell er standardterminalen i VS Code på Windows.
+  - **cmd feiler** med `c:\…`, men virker etter `cd /d C:\…\frontend`.
+  - **Git Bash feiler** med `cd /c/…`, men virker med `cd /C/…`.
+  - `vitest run --root C:\…` hjelper ikke. `vitest.config.ts` kan heller ikke fikse det, fordi feilen kommer før konfigen gjelder.
+  - **Fiks i skriptet finnes, men er ikke enkel:** et inline Node-skript som gjør `process.chdir(fs.realpathSync.native('.'))` og importerer `vitest.mjs` med absolutt sti, gir 15/15 fra cmd med `c:\…`. Det er prøvd som direkte `node -e`-kommando, ikke som `npm test`-skript. Vurder et lite `scripts/test.mjs` før det eventuelt erstatter `vitest run`.
 - [ ] 2026-11-18 [story-1-2-frontend-skjelett](988-2026-11-18-13-30-39-story-1-2-frontend-skjelett.md) — gå gjennom Story 1.2 (står på `review`) og sett den til `done` i sprint-status
